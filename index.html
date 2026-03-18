@@ -186,10 +186,10 @@
                         Histórico de revisões
                     </div>
                     <div class="filter-bar" id="filter-bar">
-                        <button class="chip active" data-filter="all">Todos</button>
                         <button class="chip" data-filter="ok">Em dia</button>
                         <button class="chip" data-filter="warning">Atenção</button>
                         <button class="chip" data-filter="danger">Vencido</button>
+                        <button class="chip active" data-filter="all">Todos</button>
                     </div>
                 </div>
 
@@ -268,35 +268,14 @@
             <!-- Tipo -->
             <div class="field">
                 <label>Tipo de manutenção *</label>
-                <select id="f-type">
-                    <option value="">— selecione —</option>
-                    <option value="oleo">Troca de óleo</option>
-                    <option value="filtro_oleo">Filtro de óleo</option>
-                    <option value="filtro_ar">Filtro de ar</option>
-                    <option value="filtro_combustivel">Filtro de combustível</option>
-                    <option value="pastilha">Troca de pastilha de freio</option>
-                    <option value="disco_freio">Disco de freio</option>
-                    <option value="velas">Troca de velas</option>
-                    <option value="correia">Correia dentada / acessórios</option>
-                    <option value="fluido_freio">Fluido de freio</option>
-                    <option value="fluido_arrefecimento">Fluido de arrefecimento</option>
-                    <option value="alinhamento">Alinhamento e balanceamento</option>
-                    <option value="pneu">Troca de pneu</option>
-                    <option value="bateria">Bateria</option>
-                    <option value="ar_cond">Revisão ar-condicionado</option>
-                    <option value="revisao_geral">Revisão geral</option>
-                    <option value="outro">Outro</option>
-                </select>
+                <div class="type-autocomplete">
+                    <input type="text" id="f-type" placeholder="Ex: Troca de óleo..." autocomplete="off">
+                    <div class="type-suggestions" id="type-suggestions"></div>
+                </div>
                 <div class="validity-hint" id="validity-hint">
                     <span class="material-icons-round">schedule</span>
                     <span id="validity-hint-text"></span>
                 </div>
-            </div>
-
-            <!-- Nome personalizado -->
-            <div class="field" id="field-custom" style="display:none">
-                <label>Nome personalizado *</label>
-                <input type="text" id="f-custom" placeholder="Ex: Troca de amortecedores">
             </div>
 
             <!-- Data + KM -->
@@ -370,10 +349,13 @@
                 <label>Nome / Modelo *</label>
                 <input type="text" id="v-name" placeholder="Ex: Civic, HB20, Strada...">
             </div>
+
             <div class="field">
                 <label>Placa</label>
                 <input type="text" id="v-plate" placeholder="ABC-1234" maxlength="8">
             </div>
+
+
 
             <div class="modal-actions">
                 <button class="btn btn-ghost" id="btn-cancel-vehicle">Cancelar</button>

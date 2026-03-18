@@ -41,12 +41,10 @@ export async function addVehicle(uid, { name, plate, year, color }) {
   const ref = await addDoc(vehiclesRef(uid), {
     name,
     plate: plate || "",
-    year: year || "",
-    color: color || "",
     currentKm: null,
     createdAt: serverTimestamp(),
   });
-  return { id: ref.id, name, plate, year, color, currentKm: null };
+  return { id: ref.id, name, plate, currentKm: null };
 }
 
 /** Atualiza o KM atual de um veículo */

@@ -1205,8 +1205,8 @@ textarea {
     font-size: .88rem;
     font-weight: 600;
     color: var(--text);
-    white-space: pre-wrap;
     word-break: break-word;
+    white-space: pre-wrap;
 }
 
 .detail-photo {
@@ -1288,4 +1288,113 @@ textarea {
 .detail-btn:disabled {
     opacity: .3;
     cursor: not-allowed;
+}
+
+/* ==================== TYPE AUTOCOMPLETE ==================== */
+.type-autocomplete {
+    position: relative;
+}
+
+.type-suggestions {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    z-index: 100;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.type-suggestions.open {
+    display: block;
+}
+
+.type-suggestion-item {
+    padding: 10px 14px;
+    font-size: .85rem;
+    font-weight: 500;
+    color: var(--text2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background .15s, color .15s;
+    border-bottom: 1px solid var(--border);
+}
+
+.type-suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.type-suggestion-item:hover,
+.type-suggestion-item.active {
+    background: var(--accent-dim);
+    color: var(--accent);
+}
+
+.type-suggestion-item .material-icons-round {
+    font-size: 16px;
+    flex-shrink: 0;
+    color: var(--text3);
+}
+
+.type-suggestion-item:hover .material-icons-round,
+.type-suggestion-item.active .material-icons-round {
+    color: var(--accent);
+}
+
+/* highlight do termo pesquisado */
+.type-suggestion-item mark {
+    background: transparent;
+    color: var(--accent);
+    font-weight: 700;
+}
+
+/* ==================== PROGRESS BAR NO CARD ==================== */
+.record-progress {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 5px;
+}
+
+.record-progress-bar {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.record-progress-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width .4s ease;
+}
+
+.record-progress-fill.status-ok {
+    background: var(--ok);
+}
+
+.record-progress-fill.status-warning {
+    background: var(--warning);
+}
+
+.record-progress-fill.status-danger {
+    background: var(--danger);
+}
+
+.record-progress-pct {
+    font-size: .62rem;
+    font-weight: 700;
+    color: var(--text3);
+    white-space: nowrap;
+    min-width: 28px;
+    text-align: right;
 }

@@ -2,7 +2,7 @@
 //  App — Controller principal
 // ============================================================
 
-import { TYPE_LABELS, TYPE_ICONS } from "./data.js";
+import { TYPE_ICONS } from "./data.js";
 import {
   fetchVehicles,
   addVehicle,
@@ -48,7 +48,7 @@ import { logout } from "./auth.js";
 let vehicles = [];
 let activeVehicle = null;
 let records = [];
-let currentFilter = "all";
+let currentFilter = "ok";
 let currentUser = null;
 let photoDataUrl = null;
 let kmSaveTimer = null;
@@ -112,12 +112,7 @@ async function handleAddVehicle() {
 
   try {
     setLoading(true);
-    const v = await addVehicle(currentUser.uid, {
-      name,
-      plate,
-      year: "",
-      color: "",
-    });
+    const v = await addVehicle(currentUser.uid, { name, plate });
     vehicles.push(v);
     renderVehicleSelect(vehicles, v.id);
     closeVehicleModal();
@@ -211,8 +206,7 @@ async function handleSave() {
   if (!activeVehicle)
     return showToast("Selecione um veículo primeiro.", "error");
 
-  const type = document.getElementById("f-type").value;
-  const custom = document.getElementById("f-custom").value.trim();
+  const label = document.getElementById("f-type").value.trim();
   const date = document.getElementById("f-date").value;
   const km = document.getElementById("f-km").value;
   const nextDate = document.getElementById("f-next-date").value;
@@ -220,15 +214,13 @@ async function handleSave() {
   const price = document.getElementById("f-price").value;
   const notes = document.getElementById("f-notes").value.trim();
 
-  if (!type) return showToast("Selecione o tipo de manutenção", "error");
+  if (!label) return showToast("Informe o tipo de manutenção", "error");
   if (!date) return showToast("Informe a data da revisão", "error");
   if (!km) return showToast("Informe o KM atual", "error");
-  if (type === "outro" && !custom)
-    return showToast("Informe o nome da manutenção", "error");
 
   const record = {
-    type,
-    label: type === "outro" ? custom : TYPE_LABELS[type],
+    type: resolveTypeKey(label),
+    label,
     date,
     km: parseInt(km),
     nextDate: nextDate || null,
@@ -415,7 +407,6 @@ async function requestNotificationPermission() {
 function scheduleNotifications() {
   const km = activeVehicle?.currentKm ?? null;
   const expired = records.filter((r) => getStatus(r, km) === "danger");
-  const warning = records.filter((r) => getStatus(r, km) === "warning");
   const vName = activeVehicle?.name || "seu carro";
 
   if (expired.length > 0) {
@@ -425,24 +416,6 @@ function scheduleNotifications() {
       tag: `care-expired-${activeVehicle?.id}`,
     });
   }
-  warning.forEach((r) => {
-    const detail = getStatusDetail(r, km);
-    const days = daysUntil(r.nextDate);
-    const remaining = kmUntil(r.nextKm, km);
-    const parts = [];
-    if ((detail.reason === "date" || detail.reason === "both") && days !== null)
-      parts.push(days === 0 ? "Vence hoje!" : `${days}d restantes`);
-    if (
-      (detail.reason === "km" || detail.reason === "both") &&
-      remaining !== null
-    )
-      parts.push(`${remaining.toLocaleString("pt-BR")} km restantes`);
-    fireNotification({
-      title: `🟡 ${vName} — ${r.label}`,
-      body: parts.join(" · ") || "Revisão próxima.",
-      tag: `care-warn-${activeVehicle?.id}-${r.id}`,
-    });
-  });
 }
 
 function fireNotification({ title, body, tag }) {
@@ -485,9 +458,7 @@ function openFormModal(record = null) {
   if (title) title.textContent = record ? "Editar revisão" : "Nova revisão";
 
   if (record) {
-    document.getElementById("f-type").value = record.type || "";
-    document.getElementById("f-custom").value =
-      record.type === "outro" ? record.label : "";
+    document.getElementById("f-type").value = record.label || "";
     document.getElementById("f-date").value = record.date || "";
     document.getElementById("f-km").value = record.km || "";
     document.getElementById("f-next-date").value = record.nextDate || "";
@@ -503,8 +474,6 @@ function openFormModal(record = null) {
       document.getElementById("f-price").value = "";
     }
     updateValidityHint(record.type);
-    document.getElementById("field-custom").style.display =
-      record.type === "outro" ? "block" : "none";
   } else {
     document.getElementById("f-date").value = new Date()
       .toISOString()
@@ -533,13 +502,11 @@ function resetForm() {
     "f-next-km",
     "f-price",
     "f-notes",
-    "f-custom",
   ].forEach((id) => {
     document.getElementById(id).value = "";
   });
   document.getElementById("file-name-label").textContent = "";
   document.getElementById("validity-hint").style.display = "none";
-  document.getElementById("field-custom").style.display = "none";
   photoDataUrl = null;
   _editingId = null;
   document.getElementById("f-date").value = new Date()
@@ -555,6 +522,137 @@ function exportData() {
   a.download = `care_${activeVehicle?.name || "backup"}_${new Date().toISOString().split("T")[0]}.json`;
   a.click();
   showToast("Backup exportado!");
+}
+
+/* ============================================================
+   AUTOCOMPLETE — TIPO DE MANUTENÇÃO
+   ============================================================ */
+
+const TYPE_SUGGESTIONS = [
+  { label: "Troca de óleo", icon: "oil_barrel", key: "oleo" },
+  { label: "Filtro de óleo", icon: "settings", key: "filtro_oleo" },
+  { label: "Filtro de ar", icon: "air", key: "filtro_ar" },
+  {
+    label: "Filtro de combustível",
+    icon: "local_gas_station",
+    key: "filtro_combustivel",
+  },
+  {
+    label: "Troca de pastilha de freio",
+    icon: "emergency_heat",
+    key: "pastilha",
+  },
+  {
+    label: "Disco de freio",
+    icon: "settings_input_component",
+    key: "disco_freio",
+  },
+  { label: "Troca de velas", icon: "bolt", key: "velas" },
+  { label: "Correia dentada", icon: "link", key: "correia" },
+  { label: "Fluido de freio", icon: "water_drop", key: "fluido_freio" },
+  {
+    label: "Fluido de arrefecimento",
+    icon: "thermostat",
+    key: "fluido_arrefecimento",
+  },
+  {
+    label: "Alinhamento e balanceamento",
+    icon: "tire_repair",
+    key: "alinhamento",
+  },
+  { label: "Troca de pneu", icon: "tire_repair", key: "pneu" },
+  { label: "Bateria", icon: "battery_charging_full", key: "bateria" },
+  { label: "Revisão ar-condicionado", icon: "ac_unit", key: "ar_cond" },
+  { label: "Revisão geral", icon: "build_circle", key: "revisao_geral" },
+];
+
+const TYPE_KEY_MAP = Object.fromEntries(
+  TYPE_SUGGESTIONS.map((s) => [s.label.toLowerCase(), s.key]),
+);
+
+function resolveTypeKey(label) {
+  return TYPE_KEY_MAP[label.trim().toLowerCase()] || "outro";
+}
+
+function initTypeAutocomplete() {
+  const input = document.getElementById("f-type");
+  const listEl = document.getElementById("type-suggestions");
+  let activeIdx = -1;
+
+  function render(term) {
+    const filtered = term
+      ? TYPE_SUGGESTIONS.filter((s) =>
+          s.label.toLowerCase().includes(term.toLowerCase()),
+        )
+      : TYPE_SUGGESTIONS;
+
+    if (filtered.length === 0) {
+      close();
+      return;
+    }
+
+    listEl.innerHTML = filtered
+      .map((s) => {
+        const hl = term
+          ? s.label.replace(new RegExp(`(${term})`, "gi"), "<mark>$1</mark>")
+          : s.label;
+        return `<div class="type-suggestion-item" data-label="${s.label}" data-key="${s.key}">
+        <span class="material-icons-round">${s.icon}</span>${hl}
+      </div>`;
+      })
+      .join("");
+
+    listEl.querySelectorAll(".type-suggestion-item").forEach((item) => {
+      item.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        pick(item.dataset.label, item.dataset.key);
+      });
+    });
+
+    activeIdx = -1;
+    listEl.classList.add("open");
+  }
+
+  function pick(label, key) {
+    input.value = label;
+    close();
+    updateValidityHint(key);
+    autoFillNext(key);
+  }
+
+  function close() {
+    listEl.classList.remove("open");
+    listEl.innerHTML = "";
+    activeIdx = -1;
+  }
+
+  input.addEventListener("focus", () => render(input.value));
+  input.addEventListener("input", () => render(input.value));
+  input.addEventListener("blur", () => setTimeout(close, 150));
+
+  input.addEventListener("keydown", (e) => {
+    const items = listEl.querySelectorAll(".type-suggestion-item");
+    if (!items.length) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      activeIdx = Math.min(activeIdx + 1, items.length - 1);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      activeIdx = Math.max(activeIdx - 1, 0);
+    } else if (e.key === "Enter" && activeIdx >= 0) {
+      e.preventDefault();
+      const item = items[activeIdx];
+      pick(item.dataset.label, item.dataset.key);
+      return;
+    } else if (e.key === "Escape") {
+      close();
+      return;
+    } else {
+      return;
+    }
+    items.forEach((el, i) => el.classList.toggle("active", i === activeIdx));
+    items[activeIdx]?.scrollIntoView({ block: "nearest" });
+  });
 }
 
 /* ============================================================
@@ -631,21 +729,17 @@ function bindEvents() {
     e.target.value = digits.length === 0 ? "" : `R$ ${reaisFormatted},${dec}`;
   });
 
-  // Tipo de manutenção
-  document.getElementById("f-type").addEventListener("change", () => {
-    const type = document.getElementById("f-type").value;
-    updateValidityHint(type);
-    autoFillNext(type);
-  });
+  // Autocomplete de tipo de manutenção
+  initTypeAutocomplete();
   document
     .getElementById("f-date")
     .addEventListener("change", () =>
-      autoFillNext(document.getElementById("f-type").value),
+      autoFillNext(resolveTypeKey(document.getElementById("f-type").value)),
     );
   document
     .getElementById("f-km")
     .addEventListener("change", () =>
-      autoFillNext(document.getElementById("f-type").value),
+      autoFillNext(resolveTypeKey(document.getElementById("f-type").value)),
     );
 
   // Upload foto

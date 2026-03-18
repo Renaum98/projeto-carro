@@ -80,7 +80,7 @@ export function renderAlerts(records) {
 
   records.forEach((r) => {
     const detail = getStatusDetail(r, _currentKm);
-    if (detail.status === "ok") return;
+    if (detail.status === "ok" || detail.status === "warning") return;
 
     const isExpired = detail.status === "danger";
     const cls = isExpired ? "danger" : "warning";
@@ -186,6 +186,33 @@ export function renderRecords(
         .filter(Boolean)
         .join("");
 
+      // Progresso por data (0% = recém feita, 100% = vencida)
+      let datePct = null;
+      if (r.date && r.nextDate) {
+        const start = new Date(r.date + "T00:00:00").getTime();
+        const end = new Date(r.nextDate + "T00:00:00").getTime();
+        const now = Date.now();
+        datePct = Math.min(
+          100,
+          Math.max(0, Math.round(((now - start) / (end - start)) * 100)),
+        );
+      }
+
+      // Progresso por KM
+      let kmPct = null;
+      if (r.km != null && r.nextKm != null && _currentKm != null) {
+        const total = r.nextKm - r.km;
+        const done = _currentKm - r.km;
+        kmPct =
+          total > 0
+            ? Math.min(100, Math.max(0, Math.round((done / total) * 100)))
+            : null;
+      }
+
+      // Usa o maior dos dois como progresso exibido
+      const pct = Math.max(datePct ?? 0, kmPct ?? 0);
+      const showProgress = !isArchived && (datePct !== null || kmPct !== null);
+
       return `
     <div class="record-card status-${status} ${isArchived ? "record-archived" : ""}" data-id="${r.id}">
       <div class="record-icon ${status}">
@@ -197,6 +224,17 @@ export function renderRecords(
           ${isArchived ? '<span class="badge-archived">Arquivado</span>' : ""}
         </div>
         <div class="record-meta">${metaParts}</div>
+        ${
+          showProgress
+            ? `
+        <div class="record-progress">
+          <div class="record-progress-bar">
+            <div class="record-progress-fill status-${status}" style="width:${pct}%"></div>
+          </div>
+          <span class="record-progress-pct">${pct}%</span>
+        </div>`
+            : ""
+        }
         ${r.notes ? `<div class="record-notes">${r.notes}</div>` : ""}
       </div>
       <div class="record-actions">
@@ -226,8 +264,6 @@ export function renderRecords(
 export function updateValidityHint(type) {
   const hint = document.getElementById("validity-hint");
   const hintText = document.getElementById("validity-hint-text");
-  const fieldCustom = document.getElementById("field-custom");
-  fieldCustom.style.display = type === "outro" ? "block" : "none";
   if (type && VALIDITY[type]) {
     hint.style.display = "flex";
     hintText.textContent = VALIDITY[type].label;
