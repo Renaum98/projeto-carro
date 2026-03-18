@@ -2,7 +2,7 @@
 //  App — Controller principal
 // ============================================================
 
-import { TYPE_LABELS } from "./data.js";
+import { TYPE_LABELS, TYPE_ICONS } from "./data.js";
 import {
   fetchVehicles,
   addVehicle,
@@ -14,13 +14,21 @@ import {
   setArchived,
 } from "./db.js";
 import {
+  doc,
+  updateDoc,
+  serverTimestamp,
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { db } from "./firebase-config.js";
+import {
   showToast,
   setLoading,
   fileToBase64,
   getStatus,
   getStatusDetail,
+  getStatusLabel,
   daysUntil,
   kmUntil,
+  formatDate,
 } from "./utils.js";
 import {
   renderStats,
@@ -37,13 +45,16 @@ import {
 import { logout } from "./auth.js";
 
 /* ---------- Estado global ---------- */
-let vehicles = []; // todos os veículos do usuário
-let activeVehicle = null; // veículo selecionado { id, name, ... }
-let records = []; // revisões do veículo ativo
+let vehicles = [];
+let activeVehicle = null;
+let records = [];
 let currentFilter = "all";
 let currentUser = null;
 let photoDataUrl = null;
 let kmSaveTimer = null;
+let _editingId = null;
+let _detailId = null;
+let _searchTerm = "";
 
 /* ---------- Inicialização ---------- */
 export async function initApp(user) {
@@ -63,13 +74,11 @@ async function loadVehicles() {
     vehicles = await fetchVehicles(currentUser.uid);
 
     if (vehicles.length === 0) {
-      // Nenhum carro cadastrado — abre modal de criação
       renderVehicleSelect(vehicles, null);
       openVehicleModal();
       return;
     }
 
-    // Restaura último veículo ativo (salvo no localStorage)
     const lastId = localStorage.getItem(`care_vehicle_${currentUser.uid}`);
     const found = vehicles.find((v) => v.id === lastId) || vehicles[0];
     renderVehicleSelect(vehicles, found.id);
@@ -82,33 +91,33 @@ async function loadVehicles() {
   }
 }
 
-/** Troca o veículo ativo e recarrega tudo */
 async function switchVehicle(vehicle) {
   activeVehicle = vehicle;
   localStorage.setItem(`care_vehicle_${currentUser.uid}`, vehicle.id);
 
-  // Atualiza odômetro
   const km = vehicle.currentKm ?? null;
   setCurrentKmUI(km);
   renderOdometer(km);
   const input = document.getElementById("current-km-input");
   if (input) input.value = km !== null ? km : "";
 
-  // Carrega revisões deste veículo
   await loadRecords();
 }
 
 async function handleAddVehicle() {
   const name = document.getElementById("v-name").value.trim();
   const plate = document.getElementById("v-plate").value.trim();
-  const year = document.getElementById("v-year").value.trim();
-  const color = document.getElementById("v-color").value.trim();
 
   if (!name) return showToast("Informe o nome/modelo do veículo", "error");
 
   try {
     setLoading(true);
-    const v = await addVehicle(currentUser.uid, { name, plate, year, color });
+    const v = await addVehicle(currentUser.uid, {
+      name,
+      plate,
+      year: "",
+      color: "",
+    });
     vehicles.push(v);
     renderVehicleSelect(vehicles, v.id);
     closeVehicleModal();
@@ -173,7 +182,6 @@ async function loadRecords() {
   }
 }
 
-/* ---------- Desarquivar ---------- */
 async function handleUnarchive(id) {
   try {
     await setArchived(currentUser.uid, activeVehicle.id, id, false);
@@ -193,8 +201,9 @@ function renderAll() {
     records,
     currentFilter,
     handleDelete,
-    openPhotoModal,
     handleUnarchive,
+    openDetailModal,
+    _searchTerm,
   );
 }
 
@@ -224,32 +233,50 @@ async function handleSave() {
     km: parseInt(km),
     nextDate: nextDate || null,
     nextKm: nextKm ? parseInt(nextKm) : null,
-    price: price ? parseFloat(price) : null,
+    price: price ? parseFloat(price.replace(/[^0-9]/g, "")) / 100 : null,
     notes,
   };
 
   try {
     setLoading(true);
-    const saved = await saveRecord(
-      currentUser.uid,
-      activeVehicle.id,
-      record,
-      photoDataUrl,
-      records,
-    );
 
-    // Se havia uma anterior do mesmo tipo, marca como arquivada localmente
-    if (saved.archivedPreviousId) {
-      records = records.map((r) =>
-        r.id === saved.archivedPreviousId ? { ...r, archived: true } : r,
+    if (_editingId) {
+      await updateDoc(
+        doc(
+          db,
+          "users",
+          currentUser.uid,
+          "vehicles",
+          activeVehicle.id,
+          "records",
+          _editingId,
+        ),
+        { ...record, updatedAt: serverTimestamp() },
       );
+      records = records.map((r) =>
+        r.id === _editingId ? { ...r, ...record } : r,
+      );
+      showToast("Revisão atualizada!");
+    } else {
+      const saved = await saveRecord(
+        currentUser.uid,
+        activeVehicle.id,
+        record,
+        photoDataUrl,
+        records,
+      );
+      if (saved.archivedPreviousId) {
+        records = records.map((r) =>
+          r.id === saved.archivedPreviousId ? { ...r, archived: true } : r,
+        );
+      }
+      records.unshift(saved);
+      showToast("Revisão salva com sucesso!");
     }
 
-    records.unshift(saved);
     renderAll();
     resetForm();
     closeFormModal();
-    showToast("Revisão salva com sucesso!");
   } catch (err) {
     console.error(err);
     showToast("Erro ao salvar. Tente novamente.", "error");
@@ -272,6 +299,79 @@ async function handleDelete(id) {
   } finally {
     setLoading(false);
   }
+}
+
+/* ============================================================
+   MODAL DE DETALHE DO CARD
+   ============================================================ */
+
+function openDetailModal(id) {
+  const r = records.find((r) => r.id === id);
+  if (!r) return;
+  _detailId = id;
+
+  const detail = getStatusDetail(r, activeVehicle?.currentKm ?? null);
+  const status = detail.status;
+  const icon = TYPE_ICONS[r.type] || "build";
+
+  const iconEl = document.getElementById("detail-icon");
+  iconEl.className = `detail-icon ${status}`;
+  document.getElementById("detail-icon-name").textContent = icon;
+  document.getElementById("detail-title").textContent = r.label;
+
+  const statusEl = document.getElementById("detail-status-label");
+  statusEl.className = `detail-status ${status}`;
+  statusEl.textContent = r.archived ? "Arquivado" : getStatusLabel(status);
+
+  const fields = [
+    { label: "Data da revisão", value: formatDate(r.date) },
+    {
+      label: "KM na revisão",
+      value: r.km ? `${Number(r.km).toLocaleString("pt-BR")} km` : "—",
+    },
+    { label: "Próxima revisão", value: formatDate(r.nextDate) },
+    {
+      label: "Próximo KM",
+      value: r.nextKm ? `${Number(r.nextKm).toLocaleString("pt-BR")} km` : "—",
+    },
+    {
+      label: "Valor pago",
+      value: r.price
+        ? `R$ ${Number(r.price).toFixed(2).replace(".", ",")}`
+        : "—",
+    },
+    { label: "Observações", value: r.notes || "—", full: true },
+  ];
+
+  document.getElementById("detail-grid").innerHTML = fields
+    .map(
+      (f) => `
+    <div class="detail-field ${f.full ? "full" : ""}">
+      <div class="detail-field-label">${f.label}</div>
+      <div class="detail-field-value">${f.value}</div>
+    </div>`,
+    )
+    .join("");
+
+  const photoEl = document.getElementById("detail-photo");
+  if (r.photoBase64) {
+    photoEl.src = r.photoBase64;
+    photoEl.style.display = "block";
+  } else {
+    photoEl.style.display = "none";
+  }
+
+  document.getElementById("detail-btn-download").disabled = !r.photoBase64;
+  document.getElementById("detail-btn-unarchive").style.display = r.archived
+    ? "flex"
+    : "none";
+
+  document.getElementById("detail-modal").classList.add("open");
+}
+
+function closeDetailModal() {
+  document.getElementById("detail-modal").classList.remove("open");
+  _detailId = null;
 }
 
 /* ============================================================
@@ -358,38 +458,64 @@ function fireNotification({ title, body, tag }) {
 }
 
 /* ============================================================
-   MODAL — NOVO VEÍCULO
+   MODAIS — VEÍCULO
    ============================================================ */
 
 function openVehicleModal() {
   document.getElementById("vehicle-modal").classList.add("open");
   document.getElementById("v-name").focus();
 }
+
 function closeVehicleModal() {
-  // Não fecha se não houver nenhum veículo cadastrado
   if (vehicles.length === 0) return;
   document.getElementById("vehicle-modal").classList.remove("open");
-  ["v-name", "v-plate", "v-year", "v-color"].forEach((id) => {
+  ["v-name", "v-plate"].forEach((id) => {
     document.getElementById(id).value = "";
   });
 }
 
 /* ============================================================
-   UTILITÁRIOS
+   MODAIS — FORMULÁRIO DE REVISÃO
    ============================================================ */
 
-function openFormModal() {
-  document.getElementById("form-modal").classList.add("open");
-  // Pre-fill date with today
-  document.getElementById("f-date").value = new Date()
-    .toISOString()
-    .split("T")[0];
-  // Pre-fill km with current vehicle odometer
-  const kmInput = document.getElementById("f-km");
-  if (activeVehicle?.currentKm && !kmInput.value) {
-    kmInput.value = activeVehicle.currentKm;
-    autoFillNext(document.getElementById("f-type").value);
+function openFormModal(record = null) {
+  _editingId = record?.id || null;
+
+  const title = document.querySelector("#form-modal h3");
+  if (title) title.textContent = record ? "Editar revisão" : "Nova revisão";
+
+  if (record) {
+    document.getElementById("f-type").value = record.type || "";
+    document.getElementById("f-custom").value =
+      record.type === "outro" ? record.label : "";
+    document.getElementById("f-date").value = record.date || "";
+    document.getElementById("f-km").value = record.km || "";
+    document.getElementById("f-next-date").value = record.nextDate || "";
+    document.getElementById("f-next-km").value = record.nextKm || "";
+    document.getElementById("f-notes").value = record.notes || "";
+    if (record.price) {
+      const cents = Math.round(record.price * 100);
+      const reais = Math.floor(cents / 100);
+      const dec = String(cents % 100).padStart(2, "0");
+      document.getElementById("f-price").value =
+        `R$ ${reais.toLocaleString("pt-BR")},${dec}`;
+    } else {
+      document.getElementById("f-price").value = "";
+    }
+    updateValidityHint(record.type);
+    document.getElementById("field-custom").style.display =
+      record.type === "outro" ? "block" : "none";
+  } else {
+    document.getElementById("f-date").value = new Date()
+      .toISOString()
+      .split("T")[0];
+    const kmInput = document.getElementById("f-km");
+    if (activeVehicle?.currentKm && !kmInput.value) {
+      kmInput.value = activeVehicle.currentKm;
+    }
   }
+
+  document.getElementById("form-modal").classList.add("open");
   setTimeout(() => document.getElementById("f-type").focus(), 100);
 }
 
@@ -415,20 +541,7 @@ function resetForm() {
   document.getElementById("validity-hint").style.display = "none";
   document.getElementById("field-custom").style.display = "none";
   photoDataUrl = null;
-  // Form modal
-  document
-    .getElementById("btn-open-form")
-    .addEventListener("click", openFormModal);
-  document
-    .getElementById("btn-cancel-form")
-    .addEventListener("click", closeFormModal);
-  document
-    .getElementById("btn-close-form")
-    .addEventListener("click", closeFormModal);
-  document.getElementById("form-modal").addEventListener("click", (e) => {
-    if (e.target === document.getElementById("form-modal")) closeFormModal();
-  });
-
+  _editingId = null;
   document.getElementById("f-date").value = new Date()
     .toISOString()
     .split("T")[0];
@@ -449,7 +562,7 @@ function exportData() {
    ============================================================ */
 
 function bindEvents() {
-  document.getElementById("btn-save").addEventListener("click", handleSave);
+  // Header
   document.getElementById("btn-logout").addEventListener("click", logout);
   document.getElementById("btn-export").addEventListener("click", exportData);
 
@@ -471,8 +584,6 @@ function bindEvents() {
       const v = vehicles.find((v) => v.id === val);
       if (v) await switchVehicle(v);
     });
-
-  // Botão remover veículo
   document
     .getElementById("btn-delete-vehicle")
     .addEventListener("click", handleDeleteVehicle);
@@ -492,7 +603,35 @@ function bindEvents() {
     if (e.key === "Enter") handleAddVehicle();
   });
 
-  // Form revisão
+  // Botão nova revisão
+  document
+    .getElementById("btn-open-form")
+    .addEventListener("click", () => openFormModal());
+
+  // Modal formulário
+  document.getElementById("btn-save").addEventListener("click", handleSave);
+  document
+    .getElementById("btn-cancel-form")
+    .addEventListener("click", closeFormModal);
+  document
+    .getElementById("btn-close-form")
+    .addEventListener("click", closeFormModal);
+  document.getElementById("form-modal").addEventListener("click", (e) => {
+    if (e.target === document.getElementById("form-modal")) closeFormModal();
+  });
+
+  // Máscara de moeda
+  document.getElementById("f-price").addEventListener("input", (e) => {
+    let digits = e.target.value.replace(/\D/g, "");
+    if (digits.length > 10) digits = digits.slice(0, 10);
+    const cents = parseInt(digits || "0", 10);
+    const reais = Math.floor(cents / 100);
+    const dec = String(cents % 100).padStart(2, "0");
+    const reaisFormatted = reais.toLocaleString("pt-BR");
+    e.target.value = digits.length === 0 ? "" : `R$ ${reaisFormatted},${dec}`;
+  });
+
+  // Tipo de manutenção
   document.getElementById("f-type").addEventListener("change", () => {
     const type = document.getElementById("f-type").value;
     updateValidityHint(type);
@@ -509,6 +648,7 @@ function bindEvents() {
       autoFillNext(document.getElementById("f-type").value),
     );
 
+  // Upload foto
   document.getElementById("f-photo").addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -529,12 +669,13 @@ function bindEvents() {
       records,
       currentFilter,
       handleDelete,
-      openPhotoModal,
       handleUnarchive,
+      openDetailModal,
+      _searchTerm,
     );
   });
 
-  // Modal foto
+  // Modal foto (ampliada)
   document
     .getElementById("btn-close-modal")
     .addEventListener("click", closePhotoModal);
@@ -542,18 +683,75 @@ function bindEvents() {
     if (e.target === document.getElementById("photo-modal")) closePhotoModal();
   });
 
-  // Form modal
+  // Modal detalhe
   document
-    .getElementById("btn-open-form")
-    .addEventListener("click", openFormModal);
+    .getElementById("btn-close-detail")
+    .addEventListener("click", closeDetailModal);
+  document.getElementById("detail-modal").addEventListener("click", (e) => {
+    if (e.target === document.getElementById("detail-modal"))
+      closeDetailModal();
+  });
+  document.getElementById("detail-photo").addEventListener("click", () => {
+    const r = records.find((r) => r.id === _detailId);
+    if (r?.photoBase64) openPhotoModal(r.photoBase64);
+  });
+  document.getElementById("detail-btn-edit").addEventListener("click", () => {
+    const r = records.find((r) => r.id === _detailId);
+    closeDetailModal();
+    if (r) openFormModal(r);
+  });
   document
-    .getElementById("btn-cancel-form")
-    .addEventListener("click", closeFormModal);
+    .getElementById("detail-btn-delete")
+    .addEventListener("click", async () => {
+      const id = _detailId;
+      closeDetailModal();
+      await handleDelete(id);
+    });
   document
-    .getElementById("btn-close-form")
-    .addEventListener("click", closeFormModal);
-  document.getElementById("form-modal").addEventListener("click", (e) => {
-    if (e.target === document.getElementById("form-modal")) closeFormModal();
+    .getElementById("detail-btn-download")
+    .addEventListener("click", () => {
+      const r = records.find((r) => r.id === _detailId);
+      if (!r?.photoBase64) return;
+      const a = document.createElement("a");
+      a.href = r.photoBase64;
+      a.download = `comprovante_${r.label}_${r.date}.jpg`;
+      a.click();
+    });
+  document
+    .getElementById("detail-btn-unarchive")
+    .addEventListener("click", async () => {
+      const id = _detailId;
+      closeDetailModal();
+      await handleUnarchive(id);
+    });
+
+  // Pesquisa
+  const searchInput = document.getElementById("search-input");
+  const searchClear = document.getElementById("search-clear");
+  searchInput.addEventListener("input", (e) => {
+    _searchTerm = e.target.value.trim().toLowerCase();
+    searchClear.style.display = _searchTerm ? "flex" : "none";
+    renderRecords(
+      records,
+      currentFilter,
+      handleDelete,
+      handleUnarchive,
+      openDetailModal,
+      _searchTerm,
+    );
+  });
+  searchClear.addEventListener("click", () => {
+    searchInput.value = "";
+    _searchTerm = "";
+    searchClear.style.display = "none";
+    renderRecords(
+      records,
+      currentFilter,
+      handleDelete,
+      handleUnarchive,
+      openDetailModal,
+      _searchTerm,
+    );
   });
 
   document.getElementById("f-date").value = new Date()

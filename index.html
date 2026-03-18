@@ -22,8 +22,6 @@
 
     <style>
         /* ── iOS / Safari fixes ── */
-
-        /* Impede zoom automático em inputs (Safari dispara zoom quando font-size < 16px) */
         @supports (-webkit-touch-callout: none) {
 
             input,
@@ -32,7 +30,6 @@
                 font-size: 16px !important;
             }
 
-            /* Mantém o visual compacto mesmo com font-size forçado */
             .odometer-input {
                 font-size: 16px !important;
             }
@@ -42,7 +39,6 @@
             }
         }
 
-        /* Corrige inputs empilhados no iOS — força box-model correto */
         input,
         select,
         textarea {
@@ -51,13 +47,11 @@
             border-radius: var(--radius-sm);
         }
 
-        /* Evita que o Safari redimensione texto automaticamente */
         body {
             -webkit-text-size-adjust: 100%;
             text-size-adjust: 100%;
         }
 
-        /* Impede bounce scroll no iOS que quebra layouts fixed */
         html {
             overscroll-behavior: none;
         }
@@ -81,7 +75,6 @@
             <p>Controle todas as manutenções do seu veículo em um só lugar. Receba alertas antes das revisões vencerem.
             </p>
             <button class="btn-google" id="btn-google-login">
-                <!-- SVG Google logo -->
                 <svg width="20" height="20" viewBox="0 0 48 48">
                     <path fill="#EA4335"
                         d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.8 2.2 30.3 0 24 0 14.7 0 6.7 5.4 2.7 13.3l7.9 6.1C12.5 13.3 17.8 9.5 24 9.5z" />
@@ -199,6 +192,16 @@
                         <button class="chip" data-filter="danger">Vencido</button>
                     </div>
                 </div>
+
+                <!-- BARRA DE PESQUISA -->
+                <div class="search-bar">
+                    <span class="material-icons-round search-icon">search</span>
+                    <input type="text" id="search-input" placeholder="Pesquisar revisão..." autocomplete="off">
+                    <button class="search-clear" id="search-clear" style="display:none">
+                        <span class="material-icons-round">close</span>
+                    </button>
+                </div>
+
                 <div id="records-list" class="records-list"></div>
             </div>
 
@@ -206,6 +209,49 @@
         <!-- end app-wrapper -->
     </div>
     <!-- end app-screen -->
+
+    <!-- ==================== DETAIL MODAL ==================== -->
+    <div class="modal-overlay" id="detail-modal">
+        <div class="modal-box modal-box--detail">
+
+            <div class="detail-header">
+                <div class="detail-icon" id="detail-icon">
+                    <span class="material-icons-round" id="detail-icon-name">build</span>
+                </div>
+                <div>
+                    <div class="detail-title" id="detail-title">—</div>
+                    <div class="detail-status" id="detail-status-label">—</div>
+                </div>
+                <button class="detail-close" id="btn-close-detail">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+
+            <div class="detail-grid" id="detail-grid"></div>
+
+            <img id="detail-photo" class="detail-photo" src="" alt="Comprovante" style="display:none">
+
+            <div class="detail-actions">
+                <button class="detail-btn edit" id="detail-btn-edit">
+                    <span class="material-icons-round">edit</span>
+                    Editar
+                </button>
+                <button class="detail-btn del" id="detail-btn-delete">
+                    <span class="material-icons-round">delete</span>
+                    Apagar
+                </button>
+                <button class="detail-btn down" id="detail-btn-download">
+                    <span class="material-icons-round">download</span>
+                    Imagem
+                </button>
+                <button class="detail-btn arch" id="detail-btn-unarchive" style="display:none">
+                    <span class="material-icons-round">unarchive</span>
+                    Reativar
+                </button>
+            </div>
+
+        </div>
+    </div>
 
     <!-- ==================== FORM MODAL ==================== -->
     <div class="modal-overlay" id="form-modal">
@@ -224,22 +270,22 @@
                 <label>Tipo de manutenção *</label>
                 <select id="f-type">
                     <option value="">— selecione —</option>
-                    <option value="oleo">🛢️ Troca de óleo</option>
-                    <option value="filtro_oleo">🔩 Filtro de óleo</option>
-                    <option value="filtro_ar">💨 Filtro de ar</option>
-                    <option value="filtro_combustivel">⛽ Filtro de combustível</option>
-                    <option value="pastilha">🛑 Troca de pastilha de freio</option>
-                    <option value="disco_freio">⚙️ Disco de freio</option>
-                    <option value="velas">✨ Troca de velas</option>
-                    <option value="correia">🔗 Correia dentada / acessórios</option>
-                    <option value="fluido_freio">🟡 Fluido de freio</option>
-                    <option value="fluido_arrefecimento">🌡️ Fluido de arrefecimento</option>
-                    <option value="alinhamento">🛞 Alinhamento e balanceamento</option>
-                    <option value="pneu">🔄 Troca de pneu</option>
-                    <option value="bateria">🔋 Bateria</option>
-                    <option value="ar_cond">❄️ Revisão ar-condicionado</option>
-                    <option value="revisao_geral">🔧 Revisão geral</option>
-                    <option value="outro">📋 Outro</option>
+                    <option value="oleo">Troca de óleo</option>
+                    <option value="filtro_oleo">Filtro de óleo</option>
+                    <option value="filtro_ar">Filtro de ar</option>
+                    <option value="filtro_combustivel">Filtro de combustível</option>
+                    <option value="pastilha">Troca de pastilha de freio</option>
+                    <option value="disco_freio">Disco de freio</option>
+                    <option value="velas">Troca de velas</option>
+                    <option value="correia">Correia dentada / acessórios</option>
+                    <option value="fluido_freio">Fluido de freio</option>
+                    <option value="fluido_arrefecimento">Fluido de arrefecimento</option>
+                    <option value="alinhamento">Alinhamento e balanceamento</option>
+                    <option value="pneu">Troca de pneu</option>
+                    <option value="bateria">Bateria</option>
+                    <option value="ar_cond">Revisão ar-condicionado</option>
+                    <option value="revisao_geral">Revisão geral</option>
+                    <option value="outro">Outro</option>
                 </select>
                 <div class="validity-hint" id="validity-hint">
                     <span class="material-icons-round">schedule</span>
@@ -280,7 +326,7 @@
             <!-- Valor -->
             <div class="field">
                 <label>Valor pago (R$)</label>
-                <input type="number" id="f-price" placeholder="Ex: 180.00" min="0" step="0.01">
+                <input type="text" id="f-price" placeholder="R$ 0,00" inputmode="numeric">
             </div>
 
             <!-- Observações -->
@@ -324,19 +370,9 @@
                 <label>Nome / Modelo *</label>
                 <input type="text" id="v-name" placeholder="Ex: Civic, HB20, Strada...">
             </div>
-            <div class="field-row">
-                <div class="field">
-                    <label>Placa</label>
-                    <input type="text" id="v-plate" placeholder="ABC-1234" maxlength="8">
-                </div>
-                <div class="field">
-                    <label>Ano</label>
-                    <input type="number" id="v-year" placeholder="Ex: 2021" min="1900" max="2100">
-                </div>
-            </div>
             <div class="field">
-                <label>Cor</label>
-                <input type="text" id="v-color" placeholder="Ex: Prata, Preto...">
+                <label>Placa</label>
+                <input type="text" id="v-plate" placeholder="ABC-1234" maxlength="8">
             </div>
 
             <div class="modal-actions">
@@ -367,11 +403,7 @@
     <!-- ==================== SCRIPTS (ES Modules) ==================== -->
     <script type="module">
         import { initAuth, loginWithGoogle } from './scripts/auth.js';
-
-        // Botão de login
         document.getElementById('btn-google-login').addEventListener('click', loginWithGoogle);
-
-        // Inicializa observador de autenticação
         initAuth();
     </script>
 

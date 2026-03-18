@@ -41,7 +41,6 @@ export function renderVehicleSelect(vehicles, activeId) {
     sel.appendChild(opt);
   });
 
-  // Opção de adicionar novo
   const addOpt = document.createElement("option");
   addOpt.value = "__new__";
   addOpt.textContent = "+ Adicionar veículo";
@@ -123,13 +122,30 @@ export function renderAlerts(records) {
    RECORDS LIST
    ============================================================ */
 
-export function renderRecords(records, filter, onDelete, onPhoto, onUnarchive) {
+export function renderRecords(
+  records,
+  filter,
+  onDelete,
+  onUnarchive,
+  onCardClick,
+  searchTerm = "",
+) {
   const list = document.getElementById("records-list");
 
-  const filtered =
+  let filtered =
     filter === "all"
       ? records
       : records.filter((r) => getStatus(r, _currentKm) === filter);
+
+  // Aplica pesquisa por label, notas ou data
+  if (searchTerm) {
+    filtered = filtered.filter(
+      (r) =>
+        r.label?.toLowerCase().includes(searchTerm) ||
+        r.notes?.toLowerCase().includes(searchTerm) ||
+        r.date?.includes(searchTerm),
+    );
+  }
 
   if (filtered.length === 0) {
     list.innerHTML = `
@@ -149,35 +165,29 @@ export function renderRecords(records, filter, onDelete, onPhoto, onUnarchive) {
       const detail = getStatusDetail(r, _currentKm);
       const status = detail.status;
       const icon = TYPE_ICONS[r.type] || "build";
-      const days = r.nextDate ? daysUntil(r.nextDate) : null;
-      const remaining = kmUntil(r.nextKm, _currentKm);
+      const isArchived = !!r.archived;
 
-      // Badge de data — mostra a data prevista formatada
       const dateBadge = r.nextDate
         ? `<span class="material-icons-round" style="font-size:11px">event</span>${formatDate(r.nextDate)}`
         : null;
 
-      // Badge de KM — mostra o KM alvo da próxima revisão
       const kmBadge =
         r.nextKm !== null && r.nextKm !== undefined
           ? `<span class="material-icons-round" style="font-size:11px">speed</span>${Number(r.nextKm).toLocaleString("pt-BR")} km`
           : null;
 
-      // Linha de meta: data da revisão + km na revisão + valor
       const metaParts = [
         `<span><span class="material-icons-round">calendar_today</span>${formatDate(r.date)}</span>`,
         `<span><span class="material-icons-round">speed</span>${Number(r.km).toLocaleString("pt-BR")} km</span>`,
         r.price
-          ? `<span><span class="material-icons-round">payments</span>R$ ${Number(r.price).toFixed(2)}</span>`
+          ? `<span><span class="material-icons-round">payments</span>R$ ${Number(r.price).toFixed(2).replace(".", ",")}</span>`
           : "",
       ]
         .filter(Boolean)
         .join("");
 
-      const isArchived = !!r.archived;
-
       return `
-    <div class="record-card status-${status} ${isArchived ? "record-archived" : ""}">
+    <div class="record-card status-${status} ${isArchived ? "record-archived" : ""}" data-id="${r.id}">
       <div class="record-icon ${status}">
         <span class="material-icons-round">${icon}</span>
       </div>
@@ -192,38 +202,19 @@ export function renderRecords(records, filter, onDelete, onPhoto, onUnarchive) {
       <div class="record-actions">
         ${!isArchived && dateBadge ? `<div class="record-due ${status}">${dateBadge}</div>` : ""}
         ${!isArchived && kmBadge ? `<div class="record-due ${status}">${kmBadge}</div>` : ""}
-        <div class="record-controls">
-          ${r.photoBase64 ? `<img src="${r.photoBase64}" class="photo-thumb" data-photo-id="${r.id}" title="Ver comprovante">` : ""}
-          ${
-            isArchived
-              ? `<button class="btn-icon-sm" data-unarchive-id="${r.id}" title="Desarquivar">
-                <span class="material-icons-round" style="font-size:15px">unarchive</span>
-               </button>`
-              : ""
-          }
-          <button class="btn-danger-ghost" data-delete-id="${r.id}" title="Remover">
-            <span class="material-icons-round" style="font-size:16px">delete_outline</span>
-          </button>
-        </div>
+        ${r.photoBase64 ? `<span class="material-icons-round record-has-photo" title="Tem comprovante">photo_camera</span>` : ""}
       </div>
     </div>`;
     })
     .join("");
 
+  // Clique no card abre o modal de detalhe
   list
-    .querySelectorAll("[data-delete-id]")
-    .forEach((btn) =>
-      btn.addEventListener("click", () => onDelete(btn.dataset.deleteId)),
-    );
-  list
-    .querySelectorAll("[data-photo-id]")
-    .forEach((img) => img.addEventListener("click", () => onPhoto(img.src)));
-  list
-    .querySelectorAll("[data-unarchive-id]")
-    .forEach((btn) =>
-      btn.addEventListener(
+    .querySelectorAll(".record-card")
+    .forEach((card) =>
+      card.addEventListener(
         "click",
-        () => onUnarchive && onUnarchive(btn.dataset.unarchiveId),
+        () => onCardClick && onCardClick(card.dataset.id),
       ),
     );
 }
