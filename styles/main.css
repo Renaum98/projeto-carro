@@ -1,0 +1,79 @@
+/* ============================================================
+   styles/main.css — Estilos principais CarE
+   ============================================================ */
+
+/* ---------- Variáveis ---------- */
+:root {
+    --bg: #0d0f14;
+    --bg2: #13161e;
+    --bg3: #1a1e28;
+    --card: #1e2332;
+    --border: #2a3048;
+    --accent: #e8c547;
+    --accent2: #f0d96b;
+    --accent-dim: rgba(232, 197, 71, .12);
+    --accent-glow: rgba(232, 197, 71, .25);
+    --danger: #ff5b5b;
+    --danger-dim: rgba(255, 91, 91, .12);
+    --warning: #ff9f43;
+    --warning-dim: rgba(255, 159, 67, .12);
+    --ok: #2ed49a;
+    --ok-dim: rgba(46, 212, 154, .12);
+    --text: #f0f2f7;
+    --text2: #8b91a8;
+    --text3: #5a607a;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 8px 32px rgba(0, 0, 0, .45);
+}
+
+/* ---------- Reset & Base ---------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: -200px;
+    left: -200px;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(232, 197, 71, .07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text3);
+}

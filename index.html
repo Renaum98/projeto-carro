@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarE — Revisões do seu carro</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Google Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/layout.css">
+    <link rel="stylesheet" href="styles/components.css">
+</head>
+
+<body>
+
+    <!-- ==================== GLOBAL LOADER ==================== -->
+    <div id="global-loader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <!-- ==================== LOGIN SCREEN ==================== -->
+    <div id="login-screen">
+        <div class="login-card">
+            <div class="brand-icon">
+                <span class="material-icons-round">directions_car</span>
+            </div>
+            <h1>Car<span>E</span></h1>
+            <p>Controle todas as manutenções do seu veículo em um só lugar. Receba alertas antes das revisões vencerem.
+            </p>
+            <button class="btn-google" id="btn-google-login">
+                <!-- SVG Google logo -->
+                <svg width="20" height="20" viewBox="0 0 48 48">
+                    <path fill="#EA4335"
+                        d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.8 2.2 30.3 0 24 0 14.7 0 6.7 5.4 2.7 13.3l7.9 6.1C12.5 13.3 17.8 9.5 24 9.5z" />
+                    <path fill="#4285F4"
+                        d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.4-4.1 7-10.1 7-17.1z" />
+                    <path fill="#FBBC05"
+                        d="M10.6 28.6A14.7 14.7 0 0 1 9.5 24c0-1.6.3-3.2.8-4.6l-7.9-6.1A23.8 23.8 0 0 0 0 24c0 3.9.9 7.5 2.5 10.7l8.1-6.1z" />
+                    <path fill="#34A853"
+                        d="M24 48c6.3 0 11.6-2.1 15.5-5.7l-7.6-5.9c-2.1 1.4-4.8 2.2-7.9 2.2-6.2 0-11.5-3.8-13.4-9.1l-8.1 6.1C6.7 42.6 14.7 48 24 48z" />
+                </svg>
+                Entrar com Google
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== APP SCREEN ==================== -->
+    <div id="app-screen" style="display:none">
+        <div class="app-wrapper">
+
+            <!-- HEADER -->
+            <header>
+                <div class="brand">
+                    <div>
+                        <div class="brand-name">Car<span>E</span></div>
+                        <div class="brand-sub">Controle de manutenção veicular</div>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <span class="user-name-compact" id="user-name">—</span>
+                    <button class="btn btn-ghost btn-compact" id="btn-export" title="Exportar">
+                        <span class="material-icons-round" style="font-size:16px">download</span>
+                        <span class="btn-label">Exportar</span>
+                    </button>
+                    <button class="btn btn-ghost btn-compact" id="btn-logout" title="Sair">
+                        <span class="material-icons-round" style="font-size:16px">logout</span>
+                        <span class="btn-label">Sair</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- ALERTS -->
+            <div id="alerts-container"></div>
+
+            <!-- TOP BAR: veículo + odômetro -->
+            <div class="top-bar">
+                <div class="vehicle-selector">
+                    <span class="material-icons-round vehicle-selector-icon">directions_car</span>
+                    <div class="vehicle-selector-body">
+                        <div class="vehicle-selector-label">Veículo</div>
+                        <select id="vehicle-select" class="vehicle-select"></select>
+                    </div>
+                    <button id="btn-delete-vehicle" class="btn-icon-ghost" title="Remover veículo">
+                        <span class="material-icons-round">delete_outline</span>
+                    </button>
+                </div>
+
+                <div class="odometer-widget">
+                    <span class="material-icons-round odometer-icon">speed</span>
+                    <div class="odometer-body">
+                        <div class="odometer-label">KM atual</div>
+                        <div class="odometer-row">
+                            <input type="number" id="current-km-input" class="odometer-input" placeholder="Ex: 45000"
+                                min="0">
+                            <span class="odometer-unit">km</span>
+                        </div>
+                        <div class="odometer-saved" id="odometer-display">— km</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STATS -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <span class="material-icons-round stat-card-icon" style="color:var(--text3)">build_circle</span>
+                    <div class="stat-value" id="stat-total" style="color:var(--text)">0</div>
+                    <div class="stat-label">Registros</div>
+                </div>
+                <div class="stat-card">
+                    <span class="material-icons-round stat-card-icon" style="color:var(--ok)">check_circle</span>
+                    <div class="stat-value ok" id="stat-ok">0</div>
+                    <div class="stat-label">Em dia</div>
+                </div>
+                <div class="stat-card">
+                    <span class="material-icons-round stat-card-icon" style="color:var(--warning)">schedule</span>
+                    <div class="stat-value warning" id="stat-warning">0</div>
+                    <div class="stat-label">Atenção</div>
+                </div>
+                <div class="stat-card">
+                    <span class="material-icons-round stat-card-icon" style="color:var(--danger)">warning</span>
+                    <div class="stat-value danger" id="stat-alert">0</div>
+                    <div class="stat-label">Vencidos</div>
+                </div>
+            </div>
+
+            <!-- BOTÃO NOVA REVISÃO -->
+            <button class="btn btn-new-record btn-new-record--full" id="btn-open-form">
+                <span class="material-icons-round">add</span>
+                Nova Revisão
+            </button>
+
+            <!-- RECORDS SECTION -->
+            <div class="records-col">
+                <div class="records-toolbar">
+                    <div class="section-title">
+                        <span class="material-icons-round" style="font-size:15px">history</span>
+                        Histórico de revisões
+                    </div>
+                    <div class="filter-bar" id="filter-bar">
+                        <button class="chip active" data-filter="all">Todos</button>
+                        <button class="chip" data-filter="ok">Em dia</button>
+                        <button class="chip" data-filter="warning">Atenção</button>
+                        <button class="chip" data-filter="danger">Vencido</button>
+                    </div>
+                </div>
+                <div id="records-list" class="records-list"></div>
+            </div>
+
+        </div>
+        <!-- end app-wrapper -->
+    </div>
+    <!-- end app-screen -->
+
+    <!-- ==================== FORM MODAL ==================== -->
+    <div class="modal-overlay" id="form-modal">
+        <div class="modal-box modal-box--form">
+
+            <div class="modal-header">
+                <span class="material-icons-round" style="color:var(--accent);font-size:22px">build</span>
+                <h3>Nova revisão</h3>
+                <button class="modal-close" id="btn-close-form" style="margin-left:auto">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+
+            <!-- Tipo -->
+            <div class="field">
+                <label>Tipo de manutenção *</label>
+                <select id="f-type">
+                    <option value="">— selecione —</option>
+                    <option value="oleo">Troca de óleo</option>
+                    <option value="filtro_oleo">Filtro de óleo</option>
+                    <option value="filtro_ar">Filtro de ar</option>
+                    <option value="filtro_combustivel">Filtro de combustível</option>
+                    <option value="pastilha">Troca de pastilha de freio</option>
+                    <option value="disco_freio">Disco de freio</option>
+                    <option value="velas">Troca de velas</option>
+                    <option value="correia">Correia dentada / acessórios</option>
+                    <option value="fluido_freio">Fluido de freio</option>
+                    <option value="fluido_arrefecimento">Fluido de arrefecimento</option>
+                    <option value="alinhamento">Alinhamento e balanceamento</option>
+                    <option value="pneu">Troca de pneu</option>
+                    <option value="bateria">Bateria</option>
+                    <option value="ar_cond">Revisão ar-condicionado</option>
+                    <option value="revisao_geral">Revisão geral</option>
+                    <option value="outro">Outro</option>
+                </select>
+                <div class="validity-hint" id="validity-hint">
+                    <span class="material-icons-round">schedule</span>
+                    <span id="validity-hint-text"></span>
+                </div>
+            </div>
+
+            <!-- Nome personalizado -->
+            <div class="field" id="field-custom" style="display:none">
+                <label>Nome personalizado *</label>
+                <input type="text" id="f-custom" placeholder="Ex: Troca de amortecedores">
+            </div>
+
+            <!-- Data + KM -->
+            <div class="field-row">
+                <div class="field">
+                    <label>Data da revisão *</label>
+                    <input type="date" id="f-date">
+                </div>
+                <div class="field">
+                    <label>KM atual *</label>
+                    <input type="number" id="f-km" placeholder="Ex: 45000" min="0">
+                </div>
+            </div>
+
+            <!-- Próxima data + próximo KM -->
+            <div class="field-row">
+                <div class="field">
+                    <label>Próxima revisão (data)</label>
+                    <input type="date" id="f-next-date">
+                </div>
+                <div class="field">
+                    <label>Próxima revisão (KM)</label>
+                    <input type="number" id="f-next-km" placeholder="Ex: 50000" min="0">
+                </div>
+            </div>
+
+            <!-- Valor -->
+            <div class="field">
+                <label>Valor pago (R$)</label>
+                <input type="number" id="f-price" placeholder="Ex: 180.00" min="0" step="0.01">
+            </div>
+
+            <!-- Observações -->
+            <div class="field">
+                <label>Observações</label>
+                <textarea id="f-notes"
+                    placeholder="Ex: Troca feita na oficina do João, óleo 5W30 sintético..."></textarea>
+            </div>
+
+            <!-- Foto -->
+            <div class="field">
+                <label>Comprovante / Foto (opcional)</label>
+                <div class="file-upload-area" id="upload-area">
+                    <input type="file" id="f-photo" accept="image/*">
+                    <span class="material-icons-round">cloud_upload</span>
+                    <p>Clique ou arraste uma foto</p>
+                    <p class="file-name" id="file-name-label"></p>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-ghost" id="btn-cancel-form">Cancelar</button>
+                <button class="btn btn-primary" id="btn-save" style="width:auto">
+                    <span class="material-icons-round">add_task</span>
+                    Salvar revisão
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ==================== VEHICLE MODAL ==================== -->
+    <div class="modal-overlay" id="vehicle-modal">
+        <div class="modal-box modal-box--sm">
+            <div class="modal-header">
+                <span class="material-icons-round" style="color:var(--accent);font-size:22px">directions_car</span>
+                <h3>Adicionar veículo</h3>
+            </div>
+
+            <div class="field">
+                <label>Nome / Modelo *</label>
+                <input type="text" id="v-name" placeholder="Ex: Civic, HB20, Strada...">
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <label>Placa</label>
+                    <input type="text" id="v-plate" placeholder="ABC-1234" maxlength="8">
+                </div>
+                <div class="field">
+                    <label>Ano</label>
+                    <input type="number" id="v-year" placeholder="Ex: 2021" min="1900" max="2100">
+                </div>
+            </div>
+            <div class="field">
+                <label>Cor</label>
+                <input type="text" id="v-color" placeholder="Ex: Prata, Preto...">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-ghost" id="btn-cancel-vehicle">Cancelar</button>
+                <button class="btn btn-primary" id="btn-add-vehicle-confirm" style="width:auto">
+                    <span class="material-icons-round">add</span> Adicionar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== PHOTO MODAL ==================== -->
+    <div class="modal-overlay" id="photo-modal">
+        <div class="modal-box">
+            <button class="modal-close" id="btn-close-modal">
+                <span class="material-icons-round">close</span>
+            </button>
+            <img id="modal-img" src="" alt="Comprovante">
+        </div>
+    </div>
+
+    <!-- ==================== TOAST ==================== -->
+    <div id="toast">
+        <span class="material-icons-round">check_circle</span>
+        <span id="toast-msg">Salvo!</span>
+    </div>
+
+    <!-- ==================== SCRIPTS (ES Modules) ==================== -->
+    <script type="module">
+        import { initAuth, loginWithGoogle } from './scripts/auth.js';
+
+        // Botão de login
+        document.getElementById('btn-google-login').addEventListener('click', loginWithGoogle);
+
+        // Inicializa observador de autenticação
+        initAuth();
+    </script>
+
+</body>
+
+</html>
