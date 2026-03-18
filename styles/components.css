@@ -737,6 +737,7 @@ textarea {
 }
 
 .odometer-input[type=number] {
+    appearance: textfield;
     -moz-appearance: textfield;
 }
 
@@ -985,6 +986,49 @@ textarea {
 
 .records-list{
     display: flex;
-    flex-direction: column;
     gap: 5px;
+    flex-direction: column;
+}
+
+/* ==================== CARDS ARQUIVADOS ==================== */
+.record-archived {
+    opacity: .5;
+    border-left-color: var(--border) !important;
+    filter: saturate(0.3);
+}
+
+.record-archived:hover {
+    opacity: .75;
+    filter: saturate(0.5);
+}
+
+.badge-archived {
+    display: inline-block;
+    font-size: .6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.btn-icon-sm {
+    background: transparent;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 3px;
+    display: flex;
+    align-items: center;
+    transition: background .2s, color .2s;
+}
+
+.btn-icon-sm:hover {
+    background: var(--accent-dim);
+    color: var(--accent);
 }

@@ -19,6 +19,7 @@ export function getStatus(record, currentKm = null) {
 
 /** Status baseado apenas na data */
 export function getDateStatus(record) {
+  if (record.archived) return "ok"; // arquivados nunca alertam
   if (!record.nextDate) return "ok";
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -36,6 +37,7 @@ export function getDateStatus(record) {
  * - ok      → dentro do limite
  */
 export function getKmStatus(record, currentKm) {
+  if (record.archived) return "ok"; // arquivados nunca alertam
   if (!record.nextKm || currentKm === null || currentKm === undefined)
     return "ok";
   const km = Number(currentKm);

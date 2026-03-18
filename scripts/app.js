@@ -11,6 +11,7 @@ import {
   fetchRecords,
   saveRecord,
   deleteRecord,
+  setArchived,
 } from "./db.js";
 import {
   showToast,
@@ -172,11 +173,29 @@ async function loadRecords() {
   }
 }
 
+/* ---------- Desarquivar ---------- */
+async function handleUnarchive(id) {
+  try {
+    await setArchived(currentUser.uid, activeVehicle.id, id, false);
+    records = records.map((r) => (r.id === id ? { ...r, archived: false } : r));
+    renderAll();
+    showToast("Revisão reativada.");
+  } catch (err) {
+    showToast("Erro ao desarquivar.", "error");
+  }
+}
+
 function renderAll() {
   setCurrentKmUI(activeVehicle?.currentKm ?? null);
   renderStats(records);
   renderAlerts(records);
-  renderRecords(records, currentFilter, handleDelete, openPhotoModal);
+  renderRecords(
+    records,
+    currentFilter,
+    handleDelete,
+    openPhotoModal,
+    handleUnarchive,
+  );
 }
 
 async function handleSave() {
@@ -216,12 +235,21 @@ async function handleSave() {
       activeVehicle.id,
       record,
       photoDataUrl,
+      records,
     );
+
+    // Se havia uma anterior do mesmo tipo, marca como arquivada localmente
+    if (saved.archivedPreviousId) {
+      records = records.map((r) =>
+        r.id === saved.archivedPreviousId ? { ...r, archived: true } : r,
+      );
+    }
+
     records.unshift(saved);
     renderAll();
     resetForm();
-    showToast("Revisão salva com sucesso!");
     closeFormModal();
+    showToast("Revisão salva com sucesso!");
   } catch (err) {
     console.error(err);
     showToast("Erro ao salvar. Tente novamente.", "error");
@@ -497,7 +525,13 @@ function bindEvents() {
       .forEach((c) => c.classList.remove("active"));
     chip.classList.add("active");
     currentFilter = chip.dataset.filter;
-    renderRecords(records, currentFilter, handleDelete, openPhotoModal);
+    renderRecords(
+      records,
+      currentFilter,
+      handleDelete,
+      openPhotoModal,
+      handleUnarchive,
+    );
   });
 
   // Modal foto

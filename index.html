@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CarE — Revisões do seu carro</title>
 
     <!-- Fonts -->
@@ -19,6 +19,49 @@
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/layout.css">
     <link rel="stylesheet" href="styles/components.css">
+
+    <style>
+        /* ── iOS / Safari fixes ── */
+
+        /* Impede zoom automático em inputs (Safari dispara zoom quando font-size < 16px) */
+        @supports (-webkit-touch-callout: none) {
+
+            input,
+            select,
+            textarea {
+                font-size: 16px !important;
+            }
+
+            /* Mantém o visual compacto mesmo com font-size forçado */
+            .odometer-input {
+                font-size: 16px !important;
+            }
+
+            .vehicle-select {
+                font-size: 16px !important;
+            }
+        }
+
+        /* Corrige inputs empilhados no iOS — força box-model correto */
+        input,
+        select,
+        textarea {
+            -webkit-appearance: none;
+            appearance: none;
+            border-radius: var(--radius-sm);
+        }
+
+        /* Evita que o Safari redimensione texto automaticamente */
+        body {
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+
+        /* Impede bounce scroll no iOS que quebra layouts fixed */
+        html {
+            overscroll-behavior: none;
+        }
+    </style>
 </head>
 
 <body>
@@ -69,14 +112,16 @@
 
                 <div class="header-right">
                     <span class="user-name-compact" id="user-name">—</span>
-                    <button class="btn btn-ghost btn-compact" id="btn-export" title="Exportar">
-                        <span class="material-icons-round" style="font-size:16px">download</span>
-                        <span class="btn-label">Exportar</span>
-                    </button>
-                    <button class="btn btn-ghost btn-compact" id="btn-logout" title="Sair">
-                        <span class="material-icons-round" style="font-size:16px">logout</span>
-                        <span class="btn-label">Sair</span>
-                    </button>
+                    <div class="grupo">
+                        <button class="btn btn-ghost btn-compact" id="btn-export" title="Exportar">
+                            <span class="material-icons-round" style="font-size:14px">download</span>
+                            <span class="btn-label">Exportar</span>
+                        </button>
+                        <button class="btn btn-ghost btn-compact" id="btn-logout" title="Sair">
+                            <span class="material-icons-round" style="font-size:14px">logout</span>
+                            <span class="btn-label">Sair</span>
+                        </button>
+                    </div>
                 </div>
             </header>
 
@@ -179,22 +224,22 @@
                 <label>Tipo de manutenção *</label>
                 <select id="f-type">
                     <option value="">— selecione —</option>
-                    <option value="oleo">Troca de óleo</option>
-                    <option value="filtro_oleo">Filtro de óleo</option>
-                    <option value="filtro_ar">Filtro de ar</option>
-                    <option value="filtro_combustivel">Filtro de combustível</option>
-                    <option value="pastilha">Troca de pastilha de freio</option>
-                    <option value="disco_freio">Disco de freio</option>
-                    <option value="velas">Troca de velas</option>
-                    <option value="correia">Correia dentada / acessórios</option>
-                    <option value="fluido_freio">Fluido de freio</option>
-                    <option value="fluido_arrefecimento">Fluido de arrefecimento</option>
-                    <option value="alinhamento">Alinhamento e balanceamento</option>
-                    <option value="pneu">Troca de pneu</option>
-                    <option value="bateria">Bateria</option>
-                    <option value="ar_cond">Revisão ar-condicionado</option>
-                    <option value="revisao_geral">Revisão geral</option>
-                    <option value="outro">Outro</option>
+                    <option value="oleo">🛢️ Troca de óleo</option>
+                    <option value="filtro_oleo">🔩 Filtro de óleo</option>
+                    <option value="filtro_ar">💨 Filtro de ar</option>
+                    <option value="filtro_combustivel">⛽ Filtro de combustível</option>
+                    <option value="pastilha">🛑 Troca de pastilha de freio</option>
+                    <option value="disco_freio">⚙️ Disco de freio</option>
+                    <option value="velas">✨ Troca de velas</option>
+                    <option value="correia">🔗 Correia dentada / acessórios</option>
+                    <option value="fluido_freio">🟡 Fluido de freio</option>
+                    <option value="fluido_arrefecimento">🌡️ Fluido de arrefecimento</option>
+                    <option value="alinhamento">🛞 Alinhamento e balanceamento</option>
+                    <option value="pneu">🔄 Troca de pneu</option>
+                    <option value="bateria">🔋 Bateria</option>
+                    <option value="ar_cond">❄️ Revisão ar-condicionado</option>
+                    <option value="revisao_geral">🔧 Revisão geral</option>
+                    <option value="outro">📋 Outro</option>
                 </select>
                 <div class="validity-hint" id="validity-hint">
                     <span class="material-icons-round">schedule</span>

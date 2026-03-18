@@ -83,8 +83,31 @@ export async function fetchRecords(uid, vehicleId) {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
-/** Salva nova revisão */
-export async function saveRecord(uid, vehicleId, record, photoDataUrl) {
+/**
+ * Salva nova revisão.
+ * Antes de salvar, arquiva automaticamente a revisão ativa
+ * mais recente do mesmo tipo (se existir), para que ela
+ * suma dos alertas mas continue no histórico.
+ */
+export async function saveRecord(
+  uid,
+  vehicleId,
+  record,
+  photoDataUrl,
+  existingRecords,
+) {
+  // Encontra a revisão mais recente do mesmo tipo que NÃO está arquivada
+  const previous = (existingRecords || [])
+    .filter((r) => r.type === record.type && !r.archived)
+    .sort(
+      (a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0),
+    )[0];
+
+  // Arquiva a anterior
+  if (previous) {
+    await updateDoc(recordDoc(uid, vehicleId, previous.id), { archived: true });
+  }
+
   const photoBase64 = photoDataUrl
     ? await compressImage(photoDataUrl, 800)
     : null;
@@ -92,10 +115,22 @@ export async function saveRecord(uid, vehicleId, record, photoDataUrl) {
   const ref = await addDoc(recordsRef(uid, vehicleId), {
     ...record,
     photoBase64,
+    archived: false,
     createdAt: serverTimestamp(),
   });
 
-  return { id: ref.id, ...record, photoBase64 };
+  return {
+    id: ref.id,
+    ...record,
+    photoBase64,
+    archived: false,
+    archivedPreviousId: previous?.id || null,
+  };
+}
+
+/** Arquiva/desarquiva manualmente uma revisão */
+export async function setArchived(uid, vehicleId, recordId, archived) {
+  await updateDoc(recordDoc(uid, vehicleId, recordId), { archived });
 }
 
 /** Remove uma revisão */

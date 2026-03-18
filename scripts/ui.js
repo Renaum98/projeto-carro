@@ -123,7 +123,7 @@ export function renderAlerts(records) {
    RECORDS LIST
    ============================================================ */
 
-export function renderRecords(records, filter, onDelete, onPhoto) {
+export function renderRecords(records, filter, onDelete, onPhoto, onUnarchive) {
   const list = document.getElementById("records-list");
 
   const filtered =
@@ -152,21 +152,15 @@ export function renderRecords(records, filter, onDelete, onPhoto) {
       const days = r.nextDate ? daysUntil(r.nextDate) : null;
       const remaining = kmUntil(r.nextKm, _currentKm);
 
-      // Badge de data — apenas o mais urgente
+      // Badge de data — mostra a data prevista formatada
       const dateBadge = r.nextDate
-        ? days < 0
-          ? `<span class="material-icons-round" style="font-size:11px">event_busy</span>${Math.abs(days)}d atrás`
-          : days === 0
-            ? `<span class="material-icons-round" style="font-size:11px">today</span>Hoje`
-            : `<span class="material-icons-round" style="font-size:11px">event</span>${days}d`
+        ? `<span class="material-icons-round" style="font-size:11px">event</span>${formatDate(r.nextDate)}`
         : null;
 
-      // Badge de KM
+      // Badge de KM — mostra o KM alvo da próxima revisão
       const kmBadge =
-        remaining !== null
-          ? remaining <= 0
-            ? `<span class="material-icons-round" style="font-size:11px">speed</span>+${Math.abs(remaining).toLocaleString("pt-BR")} km`
-            : `<span class="material-icons-round" style="font-size:11px">speed</span>${remaining.toLocaleString("pt-BR")} km`
+        r.nextKm !== null && r.nextKm !== undefined
+          ? `<span class="material-icons-round" style="font-size:11px">speed</span>${Number(r.nextKm).toLocaleString("pt-BR")} km`
           : null;
 
       // Linha de meta: data da revisão + km na revisão + valor
@@ -180,21 +174,33 @@ export function renderRecords(records, filter, onDelete, onPhoto) {
         .filter(Boolean)
         .join("");
 
+      const isArchived = !!r.archived;
+
       return `
-    <div class="record-card status-${status}">
+    <div class="record-card status-${status} ${isArchived ? "record-archived" : ""}">
       <div class="record-icon ${status}">
         <span class="material-icons-round">${icon}</span>
       </div>
       <div class="record-body">
-        <div class="record-title">${r.label}</div>
+        <div class="record-title">
+          ${r.label}
+          ${isArchived ? '<span class="badge-archived">Arquivado</span>' : ""}
+        </div>
         <div class="record-meta">${metaParts}</div>
         ${r.notes ? `<div class="record-notes">${r.notes}</div>` : ""}
       </div>
       <div class="record-actions">
-        ${dateBadge ? `<div class="record-due ${status}">${dateBadge}</div>` : ""}
-        ${kmBadge ? `<div class="record-due ${status}">${kmBadge}</div>` : ""}
+        ${!isArchived && dateBadge ? `<div class="record-due ${status}">${dateBadge}</div>` : ""}
+        ${!isArchived && kmBadge ? `<div class="record-due ${status}">${kmBadge}</div>` : ""}
         <div class="record-controls">
           ${r.photoBase64 ? `<img src="${r.photoBase64}" class="photo-thumb" data-photo-id="${r.id}" title="Ver comprovante">` : ""}
+          ${
+            isArchived
+              ? `<button class="btn-icon-sm" data-unarchive-id="${r.id}" title="Desarquivar">
+                <span class="material-icons-round" style="font-size:15px">unarchive</span>
+               </button>`
+              : ""
+          }
           <button class="btn-danger-ghost" data-delete-id="${r.id}" title="Remover">
             <span class="material-icons-round" style="font-size:16px">delete_outline</span>
           </button>
@@ -212,6 +218,14 @@ export function renderRecords(records, filter, onDelete, onPhoto) {
   list
     .querySelectorAll("[data-photo-id]")
     .forEach((img) => img.addEventListener("click", () => onPhoto(img.src)));
+  list
+    .querySelectorAll("[data-unarchive-id]")
+    .forEach((btn) =>
+      btn.addEventListener(
+        "click",
+        () => onUnarchive && onUnarchive(btn.dataset.unarchiveId),
+      ),
+    );
 }
 
 /* ============================================================
