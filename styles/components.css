@@ -791,6 +791,7 @@ textarea {
 }
 
 .odometer-input[type=number] {
+    appearance: textfield;
     -moz-appearance: textfield;
 }
 
@@ -1089,6 +1090,8 @@ textarea {
 .modal-box--detail {
     width: 95%;
     max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -1210,10 +1213,11 @@ textarea {
 }
 
 .detail-photo {
-    width: 100%;
+    margin: auto;
+    width: 80%;
     border-radius: var(--radius-sm);
     object-fit: cover;
-    max-height: 200px;
+    max-height: 140px;
     border: 1px solid var(--border);
     cursor: pointer;
     transition: opacity .2s;
