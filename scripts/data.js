@@ -3,8 +3,16 @@
 // ============================================================
 
 export const VALIDITY = {
-  oleo: { label: "Recomendação de troca: 5.000–10.000 km ou 6–12 meses", km: 7500, months: 9 },
-  filtro_oleo: { label: "Recomendação de troca: 10.000 km ou 12 meses", km: 10000, months: 12 },
+  oleo: {
+    label: "Recomendação de troca: 5.000–10.000 km ou 6–12 meses",
+    km: 7500,
+    months: 9,
+  },
+  filtro_oleo: {
+    label: "Recomendação de troca: 10.000 km ou 12 meses",
+    km: 10000,
+    months: 12,
+  },
   filtro_ar: {
     label: "Recomendação de troca: 15.000–20.000 km ou 12 meses",
     km: 17500,
@@ -15,8 +23,16 @@ export const VALIDITY = {
     km: 30000,
     months: 24,
   },
-  pastilha: { label: "Recomendação de troca: 20.000–40.000 km", km: 30000, months: 36 },
-  disco_freio: { label: "Recomendação de troca: 40.000–80.000 km", km: 60000, months: 60 },
+  pastilha: {
+    label: "Recomendação de troca: 20.000–40.000 km",
+    km: 30000,
+    months: 36,
+  },
+  disco_freio: {
+    label: "Recomendação de troca: 40.000–80.000 km",
+    km: 60000,
+    months: 60,
+  },
   velas: {
     label: "Recomendação de troca: 20.000–40.000 km ou 24 meses",
     km: 30000,
@@ -27,16 +43,32 @@ export const VALIDITY = {
     km: 80000,
     months: 48,
   },
-  fluido_freio: { label: "Recomendação de troca: 2 anos ou 30.000 km", km: 30000, months: 24 },
+  fluido_freio: {
+    label: "Recomendação de troca: 2 anos ou 30.000 km",
+    km: 30000,
+    months: 24,
+  },
   fluido_arrefecimento: {
     label: "Recomendação de troca: 2–3 anos ou 40.000 km",
     km: 40000,
     months: 30,
   },
-  alinhamento: { label: "Recomendação de troca: 10.000 km ou 12 meses", km: 10000, months: 12 },
-  pneu: { label: "Recomendação de troca: 40.000–60.000 km ou 5–6 anos", km: 50000, months: 60 },
+  alinhamento: {
+    label: "Recomendação de troca: 10.000 km ou 12 meses",
+    km: 10000,
+    months: 12,
+  },
+  pneu: {
+    label: "Recomendação de troca: 40.000–60.000 km ou 5–6 anos",
+    km: 50000,
+    months: 60,
+  },
   bateria: { label: "Recomendação de troca: 3–5 anos", km: null, months: 48 },
-  ar_cond: { label: "Anualmente ou Recomendação de troca: 20.000 km", km: 20000, months: 12 },
+  ar_cond: {
+    label: "Anualmente ou Recomendação de troca: 20.000 km",
+    km: 20000,
+    months: 12,
+  },
   revisao_geral: {
     label: "Anualmente ou Recomendação de troca: 10.000–15.000 km",
     km: 12500,
