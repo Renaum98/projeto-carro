@@ -24,6 +24,8 @@ import {
   daysUntil,
   kmUntil,
   formatDate,
+  brToIso,
+  isoToBr,
 } from "./utils.js";
 import {
   renderStats,
@@ -202,16 +204,20 @@ async function handleSave() {
     return showToast("Selecione um veículo primeiro.", "error");
 
   const label = document.getElementById("f-type").value.trim();
-  const date = document.getElementById("f-date").value;
+  const dateRaw = document.getElementById("f-date").value;
   const km = document.getElementById("f-km").value;
-  const nextDate = document.getElementById("f-next-date").value;
+  const nextDateRaw = document.getElementById("f-next-date").value;
   const nextKm = document.getElementById("f-next-km").value;
   const price = document.getElementById("f-price").value;
   const notes = document.getElementById("f-notes").value.trim();
 
   if (!label) return showToast("Informe o tipo de manutenção", "error");
-  if (!date) return showToast("Informe a data da revisão", "error");
+  if (!dateRaw) return showToast("Informe a data da revisão", "error");
+  if (dateRaw.length < 10) return showToast("Data inválida. Use DD/MM/AAAA", "error");
+  const date = brToIso(dateRaw);
+  if (!date) return showToast("Data inválida. Use DD/MM/AAAA", "error");
   if (!km) return showToast("Informe o KM atual", "error");
+  const nextDate = nextDateRaw ? brToIso(nextDateRaw) : "";
 
   const record = {
     type: resolveTypeKey(label),
@@ -451,9 +457,9 @@ function openFormModal(record = null) {
 
   if (record) {
     document.getElementById("f-type").value = record.label || "";
-    document.getElementById("f-date").value = record.date || "";
+    document.getElementById("f-date").value = isoToBr(record.date || "");
     document.getElementById("f-km").value = record.km || "";
-    document.getElementById("f-next-date").value = record.nextDate || "";
+    document.getElementById("f-next-date").value = isoToBr(record.nextDate || "");
     document.getElementById("f-next-km").value = record.nextKm || "";
     document.getElementById("f-notes").value = record.notes || "";
     if (record.price) {
@@ -467,9 +473,9 @@ function openFormModal(record = null) {
     }
     updateValidityHint(record.type);
   } else {
-    document.getElementById("f-date").value = new Date()
-      .toISOString()
-      .split("T")[0];
+    document.getElementById("f-date").value = isoToBr(
+      new Date().toISOString().split("T")[0],
+    );
     const kmInput = document.getElementById("f-km");
     if (activeVehicle?.currentKm && !kmInput.value) {
       kmInput.value = activeVehicle.currentKm;
@@ -501,9 +507,9 @@ function resetForm() {
   document.getElementById("validity-hint").style.display = "none";
   photoDataUrl = null;
   _editingId = null;
-  document.getElementById("f-date").value = new Date()
-    .toISOString()
-    .split("T")[0];
+  document.getElementById("f-date").value = isoToBr(
+    new Date().toISOString().split("T")[0],
+  );
 }
 
 function exportData() {
@@ -720,6 +726,16 @@ function bindEvents() {
     const reaisFormatted = reais.toLocaleString("pt-BR");
     e.target.value = digits.length === 0 ? "" : `R$ ${reaisFormatted},${dec}`;
   });
+
+  // Máscara DD/MM/AAAA nos campos de data
+  function applyDateMask(e) {
+    let v = e.target.value.replace(/\D/g, "").slice(0, 8);
+    if (v.length > 4) v = v.slice(0, 2) + "/" + v.slice(2, 4) + "/" + v.slice(4);
+    else if (v.length > 2) v = v.slice(0, 2) + "/" + v.slice(2);
+    e.target.value = v;
+  }
+  document.getElementById("f-date").addEventListener("input", applyDateMask);
+  document.getElementById("f-next-date").addEventListener("input", applyDateMask);
 
   // Autocomplete de tipo de manutenção
   initTypeAutocomplete();

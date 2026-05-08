@@ -95,6 +95,20 @@ export function formatDate(d) {
   return `${day}/${m}/${y}`;
 }
 
+/** Converte 'YYYY-MM-DD' → 'DD/MM/YYYY' (retorna '' se vazio) */
+export function isoToBr(iso) {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-");
+  return `${d}/${m}/${y}`;
+}
+
+/** Converte 'DD/MM/YYYY' → 'YYYY-MM-DD' (retorna '' se inválido) */
+export function brToIso(br) {
+  if (!br || br.length !== 10) return "";
+  const [d, m, y] = br.split("/");
+  return `${y}-${m}-${d}`;
+}
+
 /** Converte File para base64 */
 export function fileToBase64(file) {
   return new Promise((resolve, reject) => {

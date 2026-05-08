@@ -10,6 +10,8 @@ import {
   daysUntil,
   kmUntil,
   formatDate,
+  brToIso,
+  isoToBr,
 } from "./utils.js";
 
 /* ---------- KM atual (atualizado pelo app.js) ---------- */
@@ -276,14 +278,17 @@ export function autoFillNext(type) {
   if (!type || type === "outro") return;
   const v = VALIDITY[type];
   if (!v) return;
-  const dateVal = document.getElementById("f-date").value;
+  const dateRaw = document.getElementById("f-date").value;
   const kmVal = document.getElementById("f-km").value;
   const nextDate = document.getElementById("f-next-date");
   const nextKm = document.getElementById("f-next-km");
-  if (dateVal && !nextDate.value && v.months) {
-    const base = new Date(dateVal + "T00:00:00");
-    base.setMonth(base.getMonth() + v.months);
-    nextDate.value = base.toISOString().split("T")[0];
+  if (dateRaw && !nextDate.value && v.months) {
+    const dateIso = brToIso(dateRaw);
+    if (dateIso) {
+      const base = new Date(dateIso + "T00:00:00");
+      base.setMonth(base.getMonth() + v.months);
+      nextDate.value = isoToBr(base.toISOString().split("T")[0]);
+    }
   }
   if (kmVal && !nextKm.value && v.km) {
     nextKm.value = parseInt(kmVal) + v.km;
