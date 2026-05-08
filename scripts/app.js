@@ -10,15 +10,10 @@ import {
   saveCurrentKm,
   fetchRecords,
   saveRecord,
+  updateRecord,
   deleteRecord,
   setArchived,
 } from "./db.js";
-import {
-  doc,
-  updateDoc,
-  serverTimestamp,
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { db } from "./firebase-config.js";
 import {
   showToast,
   setLoading,
@@ -233,20 +228,17 @@ async function handleSave() {
     setLoading(true);
 
     if (_editingId) {
-      await updateDoc(
-        doc(
-          db,
-          "users",
-          currentUser.uid,
-          "vehicles",
-          activeVehicle.id,
-          "records",
-          _editingId,
-        ),
-        { ...record, updatedAt: serverTimestamp() },
+      const { photoBase64 } = await updateRecord(
+        currentUser.uid,
+        activeVehicle.id,
+        _editingId,
+        record,
+        photoDataUrl,
       );
       records = records.map((r) =>
-        r.id === _editingId ? { ...r, ...record } : r,
+        r.id === _editingId
+          ? { ...r, ...record, ...(photoBase64 ? { photoBase64 } : {}) }
+          : r,
       );
       showToast("Revisão atualizada!");
     } else {

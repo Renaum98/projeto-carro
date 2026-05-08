@@ -51,7 +51,8 @@ const firebaseConfig = {
 | ------------------ | ---------------------------------------- | ------------- |
 | **Authentication** | Build → Authentication → Sign-in method  | Google        |
 | **Firestore**      | Build → Firestore Database → Criar banco | Modo produção |
-| **Storage**        | Build → Storage → Começar                | Modo produção |
+
+> As fotos dos comprovantes são salvas como base64 comprimido direto no Firestore — **não é necessário ativar o Storage**.
 
 ### 4. Regras do Firestore
 
@@ -71,9 +72,7 @@ service cloud.firestore {
 }
 ```
 
-> Storage não é necessário — as fotos são salvas como base64 comprimido direto no Firestore.
-
-### 6. Domínio autorizado (se usar hospedagem própria)
+### 5. Domínio autorizado (se usar hospedagem própria)
 
 Em **Authentication → Settings → Authorized domains**, adicione seu domínio.
 
@@ -107,7 +106,7 @@ npx serve .
 - ✅ Login com Google (dados isolados por usuário)
 - ✅ 16 tipos de manutenção com validades médias automáticas
 - ✅ Auto-preenchimento da próxima data/KM
-- ✅ Upload de foto do comprovante (Firebase Storage)
+- ✅ Upload de foto do comprovante (base64 comprimido no Firestore)
 - ✅ Alertas visuais: vencido 🔴 / a vencer 🟡 / em dia 🟢
 - ✅ Filtros por status
 - ✅ Exportar backup em JSON
