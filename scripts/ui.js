@@ -308,6 +308,44 @@ export function renderOdometer(km) {
       : "— km";
 }
 
+const SERVICE_INTERVAL_KM = 10000;
+
+export function renderServiceReminder(km) {
+  const card = document.getElementById("service-reminder");
+  if (!card) return;
+
+  if (km === null || km === undefined || isNaN(Number(km))) {
+    card.hidden = true;
+    return;
+  }
+
+  const current = Number(km);
+  const cycleStart = Math.floor(current / SERVICE_INTERVAL_KM) * SERVICE_INTERVAL_KM;
+  const nextService = cycleStart + SERVICE_INTERVAL_KM;
+  const remaining = Math.max(0, nextService - current);
+  const done = SERVICE_INTERVAL_KM - remaining;
+  const progress = Math.min(100, Math.max(0, (done / SERVICE_INTERVAL_KM) * 100));
+
+  card.hidden = false;
+  card.classList.remove("is-warning", "is-danger");
+  if (remaining === 0 || remaining <= 500) {
+    card.classList.add("is-danger");
+  } else if (remaining <= 2000) {
+    card.classList.add("is-warning");
+  }
+
+  const fmt = (n) => Number(n).toLocaleString("pt-BR");
+  document.getElementById("service-reminder-title").textContent =
+    `${fmt(nextService)} KM`;
+  document.getElementById("service-reminder-badge").textContent =
+    remaining === 0 ? "FAÇA AGORA!" : `${fmt(remaining)} km`;
+  document.getElementById("service-reminder-fill").style.width = `${progress}%`;
+  document.getElementById("service-reminder-current").textContent =
+    `${fmt(cycleStart)} km`;
+  document.getElementById("service-reminder-next").textContent =
+    `${fmt(nextService)} km`;
+}
+
 export function openPhotoModal(src) {
   document.getElementById("modal-img").src = src;
   document.getElementById("photo-modal").classList.add("open");

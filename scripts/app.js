@@ -37,6 +37,7 @@ import {
   closePhotoModal,
   setCurrentKmUI,
   renderOdometer,
+  renderServiceReminder,
   renderVehicleSelect,
 } from "./ui.js";
 import { logout } from "./auth.js";
@@ -95,6 +96,7 @@ async function switchVehicle(vehicle) {
   const km = vehicle.currentKm ?? null;
   setCurrentKmUI(km);
   renderOdometer(km);
+  renderServiceReminder(km);
   const input = document.getElementById("current-km-input");
   if (input) input.value = km !== null ? km : "";
 
@@ -187,6 +189,7 @@ async function handleUnarchive(id) {
 
 function renderAll() {
   setCurrentKmUI(activeVehicle?.currentKm ?? null);
+  renderServiceReminder(activeVehicle?.currentKm ?? null);
   renderStats(records);
   renderAlerts(records);
   renderRecords(
@@ -376,6 +379,7 @@ function handleKmInput(e) {
   activeVehicle.currentKm = val;
   setCurrentKmUI(val);
   renderOdometer(val);
+  renderServiceReminder(val);
   renderAll();
 
   clearTimeout(kmSaveTimer);
