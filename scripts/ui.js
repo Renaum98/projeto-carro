@@ -308,42 +308,55 @@ export function renderOdometer(km) {
       : "— km";
 }
 
-const SERVICE_INTERVAL_KM = 10000;
+/* ============================================================
+   ETIQUETA DE TROCA DE ÓLEO (revisão geral)
+   ============================================================ */
 
-export function renderServiceReminder(km) {
-  const card = document.getElementById("service-reminder");
+export function renderOilSticker(records) {
+  const card = document.getElementById("oil-sticker");
   if (!card) return;
 
-  if (km === null || km === undefined || isNaN(Number(km))) {
+  const rec = (records || [])
+    .filter((r) => r.type === "revisao_geral" && !r.archived && r.revisao)
+    .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))[0];
+
+  if (!rec) {
     card.hidden = true;
-    return;
+    return false;
   }
 
-  const current = Number(km);
-  const cycleStart = Math.floor(current / SERVICE_INTERVAL_KM) * SERVICE_INTERVAL_KM;
-  const nextService = cycleStart + SERVICE_INTERVAL_KM;
-  const remaining = Math.max(0, nextService - current);
-  const done = SERVICE_INTERVAL_KM - remaining;
-  const progress = Math.min(100, Math.max(0, (done / SERVICE_INTERVAL_KM) * 100));
+  const rv = rec.revisao;
+  const fmtKm = (n) =>
+    n !== null && n !== undefined && n !== "" ? Number(n).toLocaleString("pt-BR") : "—";
+
+  const set = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
+  const check = (id, on) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle("checked", !!on);
+  };
+
+  set("oil-date", formatDate(rec.date));
+  set("oil-km", fmtKm(rec.km));
+  set("oil-motor", fmtKm(rv.motorKm));
+  set("oil-cambio", fmtKm(rv.cambioKm));
+  set("oil-freio", fmtKm(rv.freioKm));
+  set("oil-tipo", rv.oleoTipo || "—");
+  check("oil-filtro-oleo", rv.filtroOleo);
+  check("oil-filtro-ar", rv.filtroAr);
+  check("oil-correia", rv.correia);
+  check("oil-filtro-comb", rv.filtroComb);
+
+  const nextParts = [];
+  if (rec.nextDate) nextParts.push(formatDate(rec.nextDate));
+  if (rec.nextKm != null && rec.nextKm !== "")
+    nextParts.push(`${Number(rec.nextKm).toLocaleString("pt-BR")} km`);
+  set("oil-next", nextParts.length ? nextParts.join(" · ") : "—");
 
   card.hidden = false;
-  card.classList.remove("is-warning", "is-danger");
-  if (remaining === 0 || remaining <= 500) {
-    card.classList.add("is-danger");
-  } else if (remaining <= 2000) {
-    card.classList.add("is-warning");
-  }
-
-  const fmt = (n) => Number(n).toLocaleString("pt-BR");
-  document.getElementById("service-reminder-title").textContent =
-    `${fmt(nextService)} KM`;
-  document.getElementById("service-reminder-badge").textContent =
-    remaining === 0 ? "FAÇA AGORA!" : `${fmt(remaining)} km`;
-  document.getElementById("service-reminder-fill").style.width = `${progress}%`;
-  document.getElementById("service-reminder-current").textContent =
-    `${fmt(cycleStart)} km`;
-  document.getElementById("service-reminder-next").textContent =
-    `${fmt(nextService)} km`;
+  return true;
 }
 
 export function openPhotoModal(src) {

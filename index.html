@@ -55,10 +55,85 @@
         html {
             overscroll-behavior: none;
         }
+
+        /* ── Mobile: bloquear zoom (pinça / duplo-toque) ── */
+        html,
+        body {
+            touch-action: pan-x pan-y;
+            -ms-touch-action: pan-x pan-y;
+        }
+
+        /* ── Mobile: bloquear seleção e cópia de texto ── */
+        * {
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        /* …mas mantém os campos de digitação editáveis/selecionáveis */
+        input,
+        textarea {
+            -webkit-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+            -webkit-touch-callout: default;
+        }
+
+        /* ── Aviso para girar o aparelho de volta à vertical ── */
+        #rotate-overlay {
+            display: none;
+        }
+
+        @media screen and (orientation: landscape) and (max-width: 920px) {
+            #rotate-overlay {
+                display: flex;
+                position: fixed;
+                inset: 0;
+                z-index: 99999;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 14px;
+                padding: 24px;
+                text-align: center;
+                background: #0f1115;
+                color: #fff;
+                font-family: 'Poppins', Arial, sans-serif;
+            }
+
+            #rotate-overlay .material-icons-round {
+                font-size: 56px;
+                animation: rotateHint 1.8s ease-in-out infinite;
+            }
+
+            #app-screen,
+            #login-screen {
+                display: none !important;
+            }
+        }
+
+        @keyframes rotateHint {
+
+            0%,
+            100% {
+                transform: rotate(0deg);
+            }
+
+            50% {
+                transform: rotate(-90deg);
+            }
+        }
     </style>
 </head>
 
 <body>
+
+    <!-- ==================== AVISO DE ROTAÇÃO ==================== -->
+    <div id="rotate-overlay">
+        <span class="material-icons-round">screen_rotation</span>
+        <div>Gire o aparelho para a posição vertical para usar o app.</div>
+    </div>
 
     <!-- ==================== GLOBAL LOADER ==================== -->
     <div id="global-loader">
@@ -147,30 +222,55 @@
                 </div>
             </div>
 
-            <!-- LEMBRETE DE REVISÃO (estilo adesivo de para-brisa) -->
-            <div class="service-sticker" id="service-reminder" hidden>
-                <div class="service-sticker-tape"></div>
-                <div class="service-sticker-header">
-                    <span class="material-icons-round">build</span>
-                    <span>Próxima Revisão</span>
+            <!-- ETIQUETA DE TROCA DE ÓLEO / REVISÃO GERAL -->
+            <div class="oil-sticker" id="oil-sticker" hidden>
+                <div class="oil-sticker-title">TROCA DE ÓLEO</div>
+
+                <div class="oil-sticker-line">
+                    <span class="oil-k">DATA:</span>
+                    <span class="oil-v" id="oil-date">—</span>
                 </div>
-                <div class="service-sticker-stamp" id="service-reminder-title">— km</div>
-                <div class="service-sticker-rows">
-                    <div class="service-sticker-row">
-                        <span class="service-sticker-key">FALTAM</span>
-                        <span class="service-sticker-dots"></span>
-                        <span class="service-sticker-val" id="service-reminder-badge">— km</span>
-                    </div>
+                <div class="oil-sticker-line">
+                    <span class="oil-k">TROCADO COM</span>
+                    <span class="oil-v oil-fill" id="oil-km">—</span>
+                    <span class="oil-unit">Km</span>
                 </div>
-                <div class="service-sticker-bar">
-                    <div class="service-sticker-bar-fill" id="service-reminder-fill"></div>
+
+                <div class="oil-sticker-band">PRÓXIMA TROCA</div>
+
+                <div class="oil-sticker-line">
+                    <span class="oil-k">MOTOR:</span>
+                    <span class="oil-v oil-fill" id="oil-motor">—</span>
+                    <span class="oil-unit">Km</span>
                 </div>
-                <div class="service-sticker-foot">
-                    <span id="service-reminder-current">0 km</span>
-                    <span>►</span>
-                    <span id="service-reminder-next">10.000 km</span>
+                <div class="oil-sticker-line">
+                    <span class="oil-k">CÂMBIO:</span>
+                    <span class="oil-v oil-fill" id="oil-cambio">—</span>
+                    <span class="oil-unit">Km</span>
                 </div>
-                <div class="service-sticker-note">a cada 10.000 km</div>
+                <div class="oil-sticker-line">
+                    <span class="oil-k">FLUIDO FREIO:</span>
+                    <span class="oil-v oil-fill" id="oil-freio">—</span>
+                    <span class="oil-unit">Km</span>
+                </div>
+
+                <div class="oil-sticker-checks">
+                    <span class="oil-check" id="oil-filtro-oleo">FILTRO DE ÓLEO:<i class="oil-box"></i></span>
+                    <span class="oil-check" id="oil-filtro-ar">FILTRO DE AR:<i class="oil-box"></i></span>
+                    <span class="oil-check" id="oil-correia">COR. DENTADA:<i class="oil-box"></i></span>
+                    <span class="oil-check" id="oil-filtro-comb">FILTRO COMB.:<i class="oil-box"></i></span>
+                </div>
+
+                <div class="oil-sticker-line">
+                    <span class="oil-k">ÓLEO TIPO:</span>
+                    <span class="oil-v oil-fill" id="oil-tipo">—</span>
+                </div>
+
+                <div class="oil-sticker-next">
+                    <span class="material-icons-round">event_available</span>
+                    <span>PRÓXIMA REVISÃO</span>
+                    <strong id="oil-next">—</strong>
+                </div>
             </div>
 
             <!-- STATS -->
@@ -327,6 +427,43 @@
                 </div>
             </div>
 
+            <!-- Campos extras: Revisão geral (etiqueta de troca) -->
+            <div class="field rg-fields" id="rg-fields" hidden>
+                <div class="rg-fields-title">
+                    <span class="material-icons-round">build_circle</span>
+                    Itens da revisão geral
+                </div>
+                <p class="rg-fields-hint">Preencha só o que foi feito. Os KM indicam a próxima troca de cada item — pode ser diferente de 10.000.</p>
+
+                <div class="field-row">
+                    <div class="field">
+                        <label>Motor — próxima troca (KM)</label>
+                        <input type="number" id="rg-motor-km" placeholder="Ex: 60000" min="0">
+                    </div>
+                    <div class="field">
+                        <label>Câmbio — próxima troca (KM)</label>
+                        <input type="number" id="rg-cambio-km" placeholder="Ex: 80000" min="0">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Fluido de freio — próxima troca (KM)</label>
+                    <input type="number" id="rg-freio-km" placeholder="Ex: 50000" min="0">
+                </div>
+
+                <div class="rg-checks">
+                    <label class="rg-check"><input type="checkbox" id="rg-filtro-oleo"><span>Filtro de óleo</span></label>
+                    <label class="rg-check"><input type="checkbox" id="rg-filtro-ar"><span>Filtro de ar</span></label>
+                    <label class="rg-check"><input type="checkbox" id="rg-correia"><span>Correia dentada</span></label>
+                    <label class="rg-check"><input type="checkbox" id="rg-filtro-comb"><span>Filtro de combustível</span></label>
+                </div>
+
+                <div class="field">
+                    <label>Óleo (tipo)</label>
+                    <input type="text" id="rg-oleo-tipo" placeholder="Ex: 5W30 sintético" autocomplete="off">
+                </div>
+            </div>
+
             <!-- Valor -->
             <div class="field">
                 <label>Valor pago (R$)</label>
@@ -408,6 +545,50 @@
     </div>
 
     <!-- ==================== SCRIPTS (ES Modules) ==================== -->
+    <!-- ==================== MOBILE: bloqueios de zoom / cópia / rotação ==================== -->
+    <script>
+        (function () {
+            const isField = (el) =>
+                el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
+
+            // Bloqueia zoom por pinça (gestos do Safari iOS)
+            ['gesturestart', 'gesturechange', 'gestureend'].forEach((evt) =>
+                document.addEventListener(evt, (e) => e.preventDefault(), { passive: false })
+            );
+
+            // Bloqueia zoom por duplo-toque
+            let lastTouch = 0;
+            document.addEventListener('touchend', (e) => {
+                const now = Date.now();
+                if (now - lastTouch <= 300) e.preventDefault();
+                lastTouch = now;
+            }, { passive: false });
+
+            // Bloqueia zoom por pinça em navegadores que disparam multi-touch
+            document.addEventListener('touchmove', (e) => {
+                if (e.touches.length > 1) e.preventDefault();
+            }, { passive: false });
+
+            // Bloqueia zoom por Ctrl/⌘ + scroll
+            document.addEventListener('wheel', (e) => {
+                if (e.ctrlKey) e.preventDefault();
+            }, { passive: false });
+
+            // Bloqueia menu de contexto e cópia (exceto nos campos de digitação)
+            document.addEventListener('contextmenu', (e) => {
+                if (!isField(e.target)) e.preventDefault();
+            });
+            document.addEventListener('copy', (e) => {
+                if (!isField(e.target)) e.preventDefault();
+            });
+
+            // Tenta travar a orientação em vertical (funciona em PWA/fullscreen)
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('portrait').catch(() => { });
+            }
+        })();
+    </script>
+
     <script type="module">
         import { initAuth, loginWithGoogle } from './scripts/auth.js';
         document.getElementById('btn-google-login').addEventListener('click', loginWithGoogle);

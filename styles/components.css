@@ -818,252 +818,236 @@ textarea {
     }
 }
 
-/* ==================== ADESIVO DE REVISÃO (estilo para-brisa) ==================== */
-.service-sticker {
+/* ==================== ETIQUETA DE TROCA DE ÓLEO (revisão geral) ==================== */
+.oil-sticker {
     position: relative;
     max-width: 340px;
     margin: 4px auto 22px;
-    padding: 18px 22px 14px;
-    background:
-        repeating-linear-gradient(
-            0deg,
-            rgba(255, 255, 255, .015) 0 2px,
-            transparent 2px 4px
-        ),
-        linear-gradient(180deg, var(--bg3) 0%, var(--card) 100%);
-    color: var(--text);
-    border: 2px dashed var(--accent);
-    border-radius: var(--radius-sm);
-    box-shadow:
-        0 1px 0 rgba(255, 255, 255, .04) inset,
-        0 6px 18px rgba(0, 0, 0, .5),
-        0 2px 4px rgba(0, 0, 0, .35);
-    font-family: 'Courier New', 'Consolas', monospace;
-    transform: rotate(-1.2deg);
-    transition: transform .25s ease, box-shadow .25s ease;
+    padding: 16px 18px;
+    background: #ffffff;
+    color: #1a237e;
+    border: 3px solid #283593;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .5), 0 2px 4px rgba(0, 0, 0, .35);
+    font-family: 'Poppins', Arial, sans-serif;
 }
 
-.service-sticker:hover {
-    transform: rotate(-0.4deg) translateY(-2px);
-    box-shadow:
-        0 1px 0 rgba(255, 255, 255, .04) inset,
-        0 10px 26px rgba(0, 0, 0, .6),
-        0 0 0 1px var(--accent-glow);
-}
-
-.service-sticker[hidden] {
+.oil-sticker[hidden] {
     display: none;
 }
 
-/* "Fita adesiva" translúcida no topo */
-.service-sticker-tape {
-    position: absolute;
-    top: -10px;
-    left: 50%;
-    transform: translateX(-50%) rotate(-2deg);
-    width: 90px;
-    height: 18px;
-    background: var(--accent-dim);
-    border: 1px solid var(--accent-glow);
-    border-radius: 2px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, .4);
+.oil-sticker-title {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    color: #283593;
 }
 
-.service-sticker-header {
+.oil-sticker-line {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: baseline;
     gap: 8px;
     font-weight: 700;
-    font-size: .8rem;
+    font-size: .9rem;
+    margin-bottom: 8px;
+}
+
+.oil-sticker-line .oil-k {
     text-transform: uppercase;
-    letter-spacing: 2px;
-    color: var(--text2);
-    border-bottom: 1px dashed var(--border);
-    padding-bottom: 8px;
-    margin-bottom: 10px;
+    white-space: nowrap;
 }
 
-.service-sticker-header .material-icons-round {
-    font-size: 18px !important;
-    color: var(--accent);
+.oil-sticker-line .oil-v {
+    color: #1565c0;
+    font-weight: 800;
 }
 
-.service-sticker-stamp {
+.oil-sticker-line .oil-fill {
+    flex: 1;
+    border-bottom: 2px solid #283593;
+    padding: 0 4px 2px;
     text-align: center;
-    font-family: 'Courier New', 'Consolas', monospace;
-    font-size: 2.2rem;
-    font-weight: 900;
-    letter-spacing: 2px;
-    line-height: 1;
-    color: var(--accent);
-    text-shadow: 0 0 12px var(--accent-glow);
-    padding: 8px 10px;
-    margin: 4px auto 10px;
-    display: block;
-    width: 100%;
-    border: 2px solid var(--accent);
-    border-radius: var(--radius-sm);
-    background: var(--accent-dim);
-    transform: rotate(0.5deg);
 }
 
-.service-sticker-rows {
+.oil-sticker-line .oil-unit {
+    font-weight: 800;
+}
+
+.oil-sticker-band {
+    text-align: center;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #fff;
+    background: #283593;
+    border-radius: 4px;
+    padding: 5px 0;
+    margin: 12px 0;
+}
+
+.oil-sticker-checks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 12px;
     margin: 10px 0 12px;
 }
 
-.service-sticker-row {
+.oil-check {
     display: flex;
-    align-items: baseline;
-    gap: 6px;
-    font-size: .85rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-}
-
-.service-sticker-key {
-    text-transform: uppercase;
-    color: var(--text2);
-}
-
-.service-sticker-dots {
-    flex: 1;
-    border-bottom: 2px dotted var(--border);
-    transform: translateY(-3px);
-}
-
-.service-sticker-val {
-    color: var(--accent2);
-    font-weight: 900;
-    font-size: .95rem;
-}
-
-.service-sticker-bar {
-    width: 100%;
-    height: 8px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-    margin-bottom: 6px;
-}
-
-.service-sticker-bar-fill {
-    height: 100%;
-    width: 0%;
-    background: repeating-linear-gradient(
-        45deg,
-        var(--accent) 0 6px,
-        var(--accent2) 6px 12px
-    );
-    transition: width .4s ease, background .2s;
-}
-
-.service-sticker-foot {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    font-size: .7rem;
+    gap: 6px;
+    font-size: .78rem;
     font-weight: 700;
-    color: var(--text2);
-    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
-.service-sticker-foot span:nth-child(2) {
+.oil-check .oil-box {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #9fa8da;
+    background: #fff;
+    border-radius: 3px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+/* Item NÃO selecionado: apagado */
+.oil-check:not(.checked) {
+    color: #b0b6c9;
+}
+
+/* Item selecionado: caixa azul cheia com check branco */
+.oil-check.checked {
+    color: #283593;
+}
+
+.oil-check.checked .oil-box {
+    background: #283593;
+    border-color: #283593;
+}
+
+.oil-check.checked .oil-box::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 10px;
+    border: solid #fff;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+}
+
+.oil-sticker-next {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    padding: 10px 12px;
+    border: 2px solid #283593;
+    border-radius: 6px;
+    background: #e8eaf6;
+    font-weight: 800;
+    letter-spacing: .5px;
+    color: #283593;
+    font-size: .82rem;
+    text-transform: uppercase;
+}
+
+.oil-sticker-next .material-icons-round {
+    font-size: 18px;
+}
+
+.oil-sticker-next strong {
+    margin-left: auto;
+    font-size: .95rem;
+    color: #1565c0;
+}
+
+/* ==================== CAMPOS REVISÃO GERAL (formulário) ==================== */
+.rg-fields {
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    background: var(--bg3);
+}
+
+.rg-fields[hidden] {
+    display: none;
+}
+
+.rg-fields-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 4px;
+}
+
+.rg-fields-title .material-icons-round {
+    font-size: 18px;
+}
+
+.rg-fields-hint {
+    font-size: .72rem;
     color: var(--text3);
+    margin: 0 0 12px;
 }
 
-.service-sticker-note {
-    text-align: center;
-    margin-top: 8px;
-    font-size: .6rem;
-    font-style: italic;
-    color: var(--text3);
-    letter-spacing: 1px;
+.rg-checks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+    margin: 4px 0 12px;
 }
 
-/* ----- Estado: em breve (laranja) ----- */
-.service-sticker.is-warning {
-    border-color: var(--warning);
+.rg-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .85rem;
+    color: var(--text);
+    cursor: pointer;
 }
 
-.service-sticker.is-warning .service-sticker-header .material-icons-round,
-.service-sticker.is-warning .service-sticker-val {
-    color: var(--warning);
+.rg-check input {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    flex-shrink: 0;
+    border: 2px solid var(--border);
+    border-radius: 5px;
+    background: var(--bg);
+    cursor: pointer;
+    position: relative;
+    transition: background .15s, border-color .15s;
 }
 
-.service-sticker.is-warning .service-sticker-stamp {
-    color: var(--warning);
-    border-color: var(--warning);
-    background: var(--warning-dim);
-    text-shadow: 0 0 12px rgba(255, 159, 67, .4);
+.rg-check input:checked {
+    background: var(--accent);
+    border-color: var(--accent);
 }
 
-.service-sticker.is-warning .service-sticker-bar-fill {
-    background: repeating-linear-gradient(
-        45deg,
-        var(--warning) 0 6px,
-        #ffb56b 6px 12px
-    );
+.rg-check input:checked::after {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid #fff;
+    border-width: 0 2.5px 2.5px 0;
+    transform: rotate(45deg);
 }
 
-.service-sticker.is-warning .service-sticker-tape {
-    background: var(--warning-dim);
-    border-color: rgba(255, 159, 67, .35);
-}
-
-/* ----- Estado: vencido / urgente (vermelho pulsante) ----- */
-.service-sticker.is-danger {
-    border-color: var(--danger);
-    animation: stickerPulse 1.6s ease-in-out infinite;
-}
-
-.service-sticker.is-danger .service-sticker-header .material-icons-round,
-.service-sticker.is-danger .service-sticker-val {
-    color: var(--danger);
-}
-
-.service-sticker.is-danger .service-sticker-stamp {
-    color: var(--danger);
-    border-color: var(--danger);
-    background: var(--danger-dim);
-    text-shadow: 0 0 14px rgba(255, 91, 91, .45);
-}
-
-.service-sticker.is-danger .service-sticker-bar-fill {
-    background: repeating-linear-gradient(
-        45deg,
-        var(--danger) 0 6px,
-        #ff8585 6px 12px
-    );
-}
-
-.service-sticker.is-danger .service-sticker-tape {
-    background: var(--danger-dim);
-    border-color: rgba(255, 91, 91, .35);
-}
-
-@keyframes stickerPulse {
-    0%, 100% {
-        box-shadow:
-            0 1px 0 rgba(255, 255, 255, .04) inset,
-            0 6px 18px rgba(0, 0, 0, .5);
-    }
-    50% {
-        box-shadow:
-            0 1px 0 rgba(255, 255, 255, .04) inset,
-            0 6px 22px rgba(255, 91, 91, .45);
-    }
-}
-
-@media (max-width: 480px) {
-    .service-sticker {
-        transform: rotate(-0.6deg);
-        padding: 16px 16px 12px;
-    }
-    .service-sticker-stamp {
-        font-size: 1.8rem;
-    }
+.rg-check:has(input:checked) {
+    color: var(--accent);
+    font-weight: 600;
 }
 
 /* ==================== VEHICLE SELECTOR ==================== */

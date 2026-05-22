@@ -37,7 +37,7 @@ import {
   closePhotoModal,
   setCurrentKmUI,
   renderOdometer,
-  renderServiceReminder,
+  renderOilSticker,
   renderVehicleSelect,
 } from "./ui.js";
 import { logout } from "./auth.js";
@@ -96,7 +96,6 @@ async function switchVehicle(vehicle) {
   const km = vehicle.currentKm ?? null;
   setCurrentKmUI(km);
   renderOdometer(km);
-  renderServiceReminder(km);
   const input = document.getElementById("current-km-input");
   if (input) input.value = km !== null ? km : "";
 
@@ -189,7 +188,7 @@ async function handleUnarchive(id) {
 
 function renderAll() {
   setCurrentKmUI(activeVehicle?.currentKm ?? null);
-  renderServiceReminder(activeVehicle?.currentKm ?? null);
+  renderOilSticker(records);
   renderStats(records);
   renderAlerts(records);
   renderRecords(
@@ -222,8 +221,27 @@ async function handleSave() {
   if (!km) return showToast("Informe o KM atual", "error");
   const nextDate = nextDateRaw ? brToIso(nextDateRaw) : "";
 
+  const typeKey = resolveTypeKey(label);
+  let revisao = null;
+  if (typeKey === "revisao_geral") {
+    const intVal = (id) => {
+      const v = document.getElementById(id).value;
+      return v ? parseInt(v) : null;
+    };
+    revisao = {
+      motorKm: intVal("rg-motor-km"),
+      cambioKm: intVal("rg-cambio-km"),
+      freioKm: intVal("rg-freio-km"),
+      filtroOleo: document.getElementById("rg-filtro-oleo").checked,
+      filtroAr: document.getElementById("rg-filtro-ar").checked,
+      correia: document.getElementById("rg-correia").checked,
+      filtroComb: document.getElementById("rg-filtro-comb").checked,
+      oleoTipo: document.getElementById("rg-oleo-tipo").value.trim() || null,
+    };
+  }
+
   const record = {
-    type: resolveTypeKey(label),
+    type: typeKey,
     label,
     date,
     km: parseInt(km),
@@ -231,6 +249,7 @@ async function handleSave() {
     nextKm: nextKm ? parseInt(nextKm) : null,
     price: price ? parseFloat(price.replace(/[^0-9]/g, "")) / 100 : null,
     notes,
+    revisao,
   };
 
   try {
@@ -336,6 +355,25 @@ function openDetailModal(id) {
     { label: "Observações", value: r.notes || "—", full: true },
   ];
 
+  if (r.revisao) {
+    const rv = r.revisao;
+    const km = (n) =>
+      n !== null && n !== undefined && n !== ""
+        ? `${Number(n).toLocaleString("pt-BR")} km`
+        : "—";
+    const yn = (b) => (b ? "Sim" : "Não");
+    fields.push(
+      { label: "Motor (próx. troca)", value: km(rv.motorKm) },
+      { label: "Câmbio (próx. troca)", value: km(rv.cambioKm) },
+      { label: "Fluido de freio (próx. troca)", value: km(rv.freioKm) },
+      { label: "Filtro de óleo", value: yn(rv.filtroOleo) },
+      { label: "Filtro de ar", value: yn(rv.filtroAr) },
+      { label: "Correia dentada", value: yn(rv.correia) },
+      { label: "Filtro de combustível", value: yn(rv.filtroComb) },
+      { label: "Óleo (tipo)", value: rv.oleoTipo || "—", full: true },
+    );
+  }
+
   document.getElementById("detail-grid").innerHTML = fields
     .map(
       (f) => `
@@ -379,7 +417,6 @@ function handleKmInput(e) {
   activeVehicle.currentKm = val;
   setCurrentKmUI(val);
   renderOdometer(val);
-  renderServiceReminder(val);
   renderAll();
 
   clearTimeout(kmSaveTimer);
@@ -453,6 +490,25 @@ function closeVehicleModal() {
    MODAIS — FORMULÁRIO DE REVISÃO
    ============================================================ */
 
+/** Mostra/oculta os campos extras quando o tipo é "Revisão geral". */
+function toggleRevisaoFields() {
+  const key = resolveTypeKey(document.getElementById("f-type").value);
+  const fields = document.getElementById("rg-fields");
+  if (fields) fields.hidden = key !== "revisao_geral";
+}
+
+function fillRevisaoFields(rv) {
+  rv = rv || {};
+  document.getElementById("rg-motor-km").value = rv.motorKm ?? "";
+  document.getElementById("rg-cambio-km").value = rv.cambioKm ?? "";
+  document.getElementById("rg-freio-km").value = rv.freioKm ?? "";
+  document.getElementById("rg-filtro-oleo").checked = !!rv.filtroOleo;
+  document.getElementById("rg-filtro-ar").checked = !!rv.filtroAr;
+  document.getElementById("rg-correia").checked = !!rv.correia;
+  document.getElementById("rg-filtro-comb").checked = !!rv.filtroComb;
+  document.getElementById("rg-oleo-tipo").value = rv.oleoTipo || "";
+}
+
 function openFormModal(record = null) {
   _editingId = record?.id || null;
 
@@ -466,6 +522,8 @@ function openFormModal(record = null) {
     document.getElementById("f-next-date").value = isoToBr(record.nextDate || "");
     document.getElementById("f-next-km").value = record.nextKm || "";
     document.getElementById("f-notes").value = record.notes || "";
+    fillRevisaoFields(record.revisao);
+    toggleRevisaoFields();
     if (record.price) {
       const cents = Math.round(record.price * 100);
       const reais = Math.floor(cents / 100);
@@ -484,6 +542,8 @@ function openFormModal(record = null) {
     if (activeVehicle?.currentKm && !kmInput.value) {
       kmInput.value = activeVehicle.currentKm;
     }
+    fillRevisaoFields(null);
+    toggleRevisaoFields();
   }
 
   document.getElementById("form-modal").classList.add("open");
@@ -509,6 +569,8 @@ function resetForm() {
   });
   document.getElementById("file-name-label").textContent = "";
   document.getElementById("validity-hint").style.display = "none";
+  fillRevisaoFields(null);
+  toggleRevisaoFields();
   photoDataUrl = null;
   _editingId = null;
   document.getElementById("f-date").value = isoToBr(
@@ -620,6 +682,7 @@ function initTypeAutocomplete() {
     close();
     updateValidityHint(key);
     autoFillNext(key);
+    toggleRevisaoFields();
   }
 
   function close() {
@@ -743,6 +806,9 @@ function bindEvents() {
 
   // Autocomplete de tipo de manutenção
   initTypeAutocomplete();
+  document
+    .getElementById("f-type")
+    .addEventListener("input", toggleRevisaoFields);
   document
     .getElementById("f-date")
     .addEventListener("change", () =>
