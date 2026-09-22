@@ -3,13 +3,20 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0b0b0c">
+    <meta name="color-scheme" content="dark">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CarE">
+    <meta name="format-detection" content="telephone=no">
     <title>CarE — Revisões do seu carro</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
         rel="stylesheet">
 
     <!-- Google Material Icons -->
@@ -97,13 +104,14 @@
                 gap: 14px;
                 padding: 24px;
                 text-align: center;
-                background: #0f1115;
-                color: #fff;
-                font-family: 'Poppins', Arial, sans-serif;
+                background: var(--bg);
+                color: var(--text);
+                font-family: 'Inter', Arial, sans-serif;
             }
 
             #rotate-overlay .material-icons-round {
-                font-size: 56px;
+                font-size: 40px;
+                color: var(--text2);
                 animation: rotateHint 1.8s ease-in-out infinite;
             }
 
@@ -143,9 +151,6 @@
     <!-- ==================== LOGIN SCREEN ==================== -->
     <div id="login-screen">
         <div class="login-card">
-            <div class="brand-icon">
-                <span class="material-icons-round">directions_car</span>
-            </div>
             <h1>Car<span>E</span></h1>
             <p>Controle todas as manutenções do seu veículo em um só lugar. Receba alertas antes das revisões vencerem.
             </p>
@@ -174,19 +179,19 @@
                 <div class="brand">
                     <div>
                         <div class="brand-name">Car<span>E</span></div>
-                        <div class="brand-sub">Controle de manutenção veicular</div>
+                        <div class="brand-sub">Manutenção veicular</div>
                     </div>
                 </div>
 
                 <div class="header-right">
                     <span class="user-name-compact" id="user-name">—</span>
-                    <div class="grupo">
+                    <div class="header-actions">
                         <button class="btn btn-ghost btn-compact" id="btn-export" title="Exportar">
-                            <span class="material-icons-round" style="font-size:14px">download</span>
+                            <span class="material-icons-round">download</span>
                             <span class="btn-label">Exportar</span>
                         </button>
                         <button class="btn btn-ghost btn-compact" id="btn-logout" title="Sair">
-                            <span class="material-icons-round" style="font-size:14px">logout</span>
+                            <span class="material-icons-round">logout</span>
                             <span class="btn-label">Sair</span>
                         </button>
                     </div>
@@ -199,22 +204,20 @@
             <!-- TOP BAR: veículo + odômetro -->
             <div class="top-bar">
                 <div class="vehicle-selector">
-                    <span class="material-icons-round vehicle-selector-icon">directions_car</span>
                     <div class="vehicle-selector-body">
                         <div class="vehicle-selector-label">Veículo</div>
                         <select id="vehicle-select" class="vehicle-select"></select>
                     </div>
-                    <button id="btn-delete-vehicle" class="btn-icon-ghost" title="Remover veículo">
+                    <button id="btn-delete-vehicle" class="btn-icon-ghost" title="Remover veículo" aria-label="Remover veículo">
                         <span class="material-icons-round">delete_outline</span>
                     </button>
                 </div>
 
                 <div class="odometer-widget">
-                    <span class="material-icons-round odometer-icon">speed</span>
                     <div class="odometer-body">
                         <div class="odometer-label">KM atual</div>
                         <div class="odometer-row">
-                            <input type="number" id="current-km-input" class="odometer-input" placeholder="Ex: 45000"
+                            <input type="number" id="current-km-input" inputmode="numeric" pattern="[0-9]*" class="odometer-input" placeholder="Ex: 45000"
                                 min="0">
                             <span class="odometer-unit">km</span>
                         </div>
@@ -223,77 +226,64 @@
             </div>
 
             <!-- ETIQUETA DE TROCA DE ÓLEO / REVISÃO GERAL -->
-            <div class="oil-sticker" id="oil-sticker" hidden>
-                <div class="oil-sticker-title">TROCA DE ÓLEO</div>
-
-                <div class="oil-sticker-line">
-                    <span class="oil-k">DATA:</span>
-                    <span class="oil-v" id="oil-date">—</span>
-                </div>
-                <div class="oil-sticker-line">
-                    <span class="oil-k">TROCADO COM</span>
-                    <span class="oil-v oil-fill" id="oil-km">—</span>
-                    <span class="oil-unit">Km</span>
-                </div>
-
-                <div class="oil-sticker-band">PRÓXIMA TROCA</div>
-
-                <div class="oil-sticker-line">
-                    <span class="oil-k">MOTOR:</span>
-                    <span class="oil-v oil-fill" id="oil-motor">—</span>
-                    <span class="oil-unit">Km</span>
-                </div>
-                <div class="oil-sticker-line">
-                    <span class="oil-k">CÂMBIO:</span>
-                    <span class="oil-v oil-fill" id="oil-cambio">—</span>
-                    <span class="oil-unit">Km</span>
-                </div>
-                <div class="oil-sticker-line">
-                    <span class="oil-k">FLUIDO FREIO:</span>
-                    <span class="oil-v oil-fill" id="oil-freio">—</span>
-                    <span class="oil-unit">Km</span>
+            <section class="oil-sticker" id="oil-sticker" hidden>
+                <div class="oil-head">
+                    <div class="oil-head-main">
+                        <div class="oil-eyebrow">Troca de óleo</div>
+                        <div class="oil-date" id="oil-date">—</div>
+                        <div class="oil-sub">Trocado com <span id="oil-km">—</span></div>
+                    </div>
+                    <div class="oil-head-next">
+                        <div class="oil-eyebrow">Próxima revisão</div>
+                        <div class="oil-next" id="oil-next">—</div>
+                    </div>
                 </div>
 
-                <div class="oil-sticker-checks">
-                    <span class="oil-check" id="oil-filtro-oleo">FILTRO DE ÓLEO:<i class="oil-box"></i></span>
-                    <span class="oil-check" id="oil-filtro-ar">FILTRO DE AR:<i class="oil-box"></i></span>
-                    <span class="oil-check" id="oil-correia">COR. DENTADA:<i class="oil-box"></i></span>
-                    <span class="oil-check" id="oil-filtro-comb">FILTRO COMB.:<i class="oil-box"></i></span>
+                <div class="oil-section-label">Próxima troca</div>
+                <div class="oil-grid">
+                    <div class="oil-item">
+                        <span class="oil-k">Motor</span>
+                        <span class="oil-v" id="oil-motor">—</span>
+                    </div>
+                    <div class="oil-item">
+                        <span class="oil-k">Câmbio</span>
+                        <span class="oil-v" id="oil-cambio">—</span>
+                    </div>
+                    <div class="oil-item">
+                        <span class="oil-k">Fluido de freio</span>
+                        <span class="oil-v" id="oil-freio">—</span>
+                    </div>
+                    <div class="oil-item">
+                        <span class="oil-k">Tipo de óleo</span>
+                        <span class="oil-v" id="oil-tipo">—</span>
+                    </div>
                 </div>
 
-                <div class="oil-sticker-line">
-                    <span class="oil-k">ÓLEO TIPO:</span>
-                    <span class="oil-v oil-fill" id="oil-tipo">—</span>
+                <div class="oil-checks">
+                    <span class="oil-check" id="oil-filtro-oleo">Filtro de óleo</span>
+                    <span class="oil-check" id="oil-filtro-ar">Filtro de ar</span>
+                    <span class="oil-check" id="oil-correia">Correia dentada</span>
+                    <span class="oil-check" id="oil-filtro-comb">Filtro de combustível</span>
                 </div>
-
-                <div class="oil-sticker-next">
-                    <span class="material-icons-round">event_available</span>
-                    <span>PRÓXIMA REVISÃO</span>
-                    <strong id="oil-next">—</strong>
-                </div>
-            </div>
+            </section>
 
             <!-- STATS -->
             <div class="stats-row">
                 <div class="stat-card">
-                    <span class="material-icons-round stat-card-icon" style="color:var(--text3)">build_circle</span>
-                    <div class="stat-value" id="stat-total" style="color:var(--text)">0</div>
+                    <div class="stat-value" id="stat-total">0</div>
                     <div class="stat-label">Registros</div>
                 </div>
                 <div class="stat-card">
-                    <span class="material-icons-round stat-card-icon" style="color:var(--ok)">check_circle</span>
                     <div class="stat-value ok" id="stat-ok">0</div>
-                    <div class="stat-label">Em dia</div>
+                    <div class="stat-label"><i class="dot ok"></i>Em dia</div>
                 </div>
                 <div class="stat-card">
-                    <span class="material-icons-round stat-card-icon" style="color:var(--warning)">schedule</span>
                     <div class="stat-value warning" id="stat-warning">0</div>
-                    <div class="stat-label">Atenção</div>
+                    <div class="stat-label"><i class="dot warning"></i>Atenção</div>
                 </div>
                 <div class="stat-card">
-                    <span class="material-icons-round stat-card-icon" style="color:var(--danger)">warning</span>
                     <div class="stat-value danger" id="stat-alert">0</div>
-                    <div class="stat-label">Vencidos</div>
+                    <div class="stat-label"><i class="dot danger"></i>Vencidos</div>
                 </div>
             </div>
 
@@ -307,8 +297,7 @@
             <div class="records-col">
                 <div class="records-toolbar">
                     <div class="section-title">
-                        <span class="material-icons-round" style="font-size:15px">history</span>
-                        Histórico de revisões
+                        Histórico
                     </div>
                     <div class="filter-bar" id="filter-bar">
                         <button class="chip active" data-filter="ok">Em dia</button>
@@ -321,8 +310,8 @@
                 <!-- BARRA DE PESQUISA -->
                 <div class="search-bar">
                     <span class="material-icons-round search-icon">search</span>
-                    <input type="text" id="search-input" placeholder="Pesquisar revisão..." autocomplete="off">
-                    <button class="search-clear" id="search-clear" style="display:none">
+                    <input type="search" id="search-input" placeholder="Pesquisar revisão..." autocomplete="off" enterkeyhint="search">
+                    <button class="search-clear" id="search-clear" style="display:none" aria-label="Limpar pesquisa">
                         <span class="material-icons-round">close</span>
                     </button>
                 </div>
@@ -340,14 +329,11 @@
         <div class="modal-box modal-box--detail">
 
             <div class="detail-header">
-                <div class="detail-icon" id="detail-icon">
-                    <span class="material-icons-round" id="detail-icon-name">build</span>
-                </div>
-                <div>
+                <div class="detail-heading">
                     <div class="detail-title" id="detail-title">—</div>
                     <div class="detail-status" id="detail-status-label">—</div>
                 </div>
-                <button class="detail-close" id="btn-close-detail">
+                <button class="detail-close" id="btn-close-detail" aria-label="Fechar">
                     <span class="material-icons-round">close</span>
                 </button>
             </div>
@@ -358,19 +344,15 @@
 
             <div class="detail-actions">
                 <button class="detail-btn edit" id="detail-btn-edit">
-                    <span class="material-icons-round">edit</span>
                     Editar
                 </button>
                 <button class="detail-btn del" id="detail-btn-delete">
-                    <span class="material-icons-round">delete</span>
                     Apagar
                 </button>
                 <button class="detail-btn down" id="detail-btn-download">
-                    <span class="material-icons-round">download</span>
                     Imagem
                 </button>
                 <button class="detail-btn arch" id="detail-btn-unarchive" style="display:none">
-                    <span class="material-icons-round">unarchive</span>
                     Reativar
                 </button>
             </div>
@@ -383,9 +365,8 @@
         <div class="modal-box modal-box--form">
 
             <div class="modal-header">
-                <span class="material-icons-round" style="color:var(--accent);font-size:22px">build</span>
                 <h3>Nova revisão</h3>
-                <button class="modal-close" id="btn-close-form" style="margin-left:auto">
+                <button class="modal-close" id="btn-close-form" aria-label="Fechar">
                     <span class="material-icons-round">close</span>
                 </button>
             </div>
@@ -394,11 +375,10 @@
             <div class="field">
                 <label>Tipo de manutenção *</label>
                 <div class="type-autocomplete">
-                    <input type="text" id="f-type" placeholder="Ex: Troca de óleo..." autocomplete="off">
+                    <input type="text" id="f-type" placeholder="Ex: Troca de óleo..." autocomplete="off" autocapitalize="sentences" enterkeyhint="next">
                     <div class="type-suggestions" id="type-suggestions"></div>
                 </div>
                 <div class="validity-hint" id="validity-hint">
-                    <span class="material-icons-round">schedule</span>
                     <span id="validity-hint-text"></span>
                 </div>
             </div>
@@ -411,7 +391,7 @@
                 </div>
                 <div class="field">
                     <label>KM atual *</label>
-                    <input type="number" id="f-km" placeholder="Ex: 45000" min="0">
+                    <input type="number" id="f-km" inputmode="numeric" pattern="[0-9]*" placeholder="Ex: 45000" min="0">
                 </div>
             </div>
 
@@ -423,14 +403,13 @@
                 </div>
                 <div class="field">
                     <label>Próxima revisão (KM)</label>
-                    <input type="number" id="f-next-km" placeholder="Ex: 50000" min="0">
+                    <input type="number" id="f-next-km" inputmode="numeric" pattern="[0-9]*" placeholder="Ex: 50000" min="0">
                 </div>
             </div>
 
             <!-- Campos extras: Revisão geral (etiqueta de troca) -->
             <div class="field rg-fields" id="rg-fields" hidden>
                 <div class="rg-fields-title">
-                    <span class="material-icons-round">build_circle</span>
                     Itens da revisão geral
                 </div>
                 <p class="rg-fields-hint">Preencha só o que foi feito. Os KM indicam a próxima troca de cada item — pode ser diferente de 10.000.</p>
@@ -438,17 +417,17 @@
                 <div class="field-row">
                     <div class="field">
                         <label>Motor — próxima troca (KM)</label>
-                        <input type="number" id="rg-motor-km" placeholder="Ex: 60000" min="0">
+                        <input type="number" id="rg-motor-km" inputmode="numeric" pattern="[0-9]*" placeholder="Ex: 60000" min="0">
                     </div>
                     <div class="field">
                         <label>Câmbio — próxima troca (KM)</label>
-                        <input type="number" id="rg-cambio-km" placeholder="Ex: 80000" min="0">
+                        <input type="number" id="rg-cambio-km" inputmode="numeric" pattern="[0-9]*" placeholder="Ex: 80000" min="0">
                     </div>
                 </div>
 
                 <div class="field">
                     <label>Fluido de freio — próxima troca (KM)</label>
-                    <input type="number" id="rg-freio-km" placeholder="Ex: 50000" min="0">
+                    <input type="number" id="rg-freio-km" inputmode="numeric" pattern="[0-9]*" placeholder="Ex: 50000" min="0">
                 </div>
 
                 <div class="rg-checks">
@@ -467,13 +446,13 @@
             <!-- Valor -->
             <div class="field">
                 <label>Valor pago (R$)</label>
-                <input type="text" id="f-price" placeholder="R$ 0,00" inputmode="numeric">
+                <input type="text" id="f-price" placeholder="R$ 0,00" inputmode="numeric" enterkeyhint="next">
             </div>
 
             <!-- Observações -->
             <div class="field">
                 <label>Observações</label>
-                <textarea id="f-notes"
+                <textarea id="f-notes" autocapitalize="sentences"
                     placeholder="Ex: Troca feita na oficina do João, óleo 5W30 sintético..."></textarea>
             </div>
 
@@ -482,7 +461,6 @@
                 <label>Comprovante / Foto (opcional)</label>
                 <div class="file-upload-area" id="upload-area">
                     <input type="file" id="f-photo" accept="image/*">
-                    <span class="material-icons-round">cloud_upload</span>
                     <p>Clique ou arraste uma foto</p>
                     <p class="file-name" id="file-name-label"></p>
                 </div>
@@ -490,8 +468,7 @@
 
             <div class="modal-actions">
                 <button class="btn btn-ghost" id="btn-cancel-form">Cancelar</button>
-                <button class="btn btn-primary" id="btn-save" style="width:auto">
-                    <span class="material-icons-round">add_task</span>
+                <button class="btn btn-primary" id="btn-save">
                     Salvar revisão
                 </button>
             </div>
@@ -503,26 +480,23 @@
     <div class="modal-overlay" id="vehicle-modal">
         <div class="modal-box modal-box--sm">
             <div class="modal-header">
-                <span class="material-icons-round" style="color:var(--accent);font-size:22px">directions_car</span>
                 <h3>Adicionar veículo</h3>
             </div>
 
             <div class="field">
                 <label>Nome / Modelo *</label>
-                <input type="text" id="v-name" placeholder="Ex: Civic, HB20, Strada...">
+                <input type="text" id="v-name" placeholder="Ex: Civic, HB20, Strada..." autocapitalize="words" enterkeyhint="done">
             </div>
 
             <div class="field">
                 <label>Placa</label>
-                <input type="text" id="v-plate" placeholder="ABC-1234" maxlength="8">
+                <input type="text" id="v-plate" placeholder="ABC-1234" maxlength="8" autocapitalize="characters" autocomplete="off" spellcheck="false">
             </div>
-
-
 
             <div class="modal-actions">
                 <button class="btn btn-ghost" id="btn-cancel-vehicle">Cancelar</button>
-                <button class="btn btn-primary" id="btn-add-vehicle-confirm" style="width:auto">
-                    <span class="material-icons-round">add</span> Adicionar
+                <button class="btn btn-primary" id="btn-add-vehicle-confirm">
+                    Adicionar
                 </button>
             </div>
         </div>
@@ -530,8 +504,8 @@
 
     <!-- ==================== PHOTO MODAL ==================== -->
     <div class="modal-overlay" id="photo-modal">
-        <div class="modal-box">
-            <button class="modal-close" id="btn-close-modal">
+        <div class="modal-box modal-box--photo">
+            <button class="modal-close" id="btn-close-modal" aria-label="Fechar">
                 <span class="material-icons-round">close</span>
             </button>
             <img id="modal-img" src="" alt="Comprovante">
@@ -540,7 +514,6 @@
 
     <!-- ==================== TOAST ==================== -->
     <div id="toast">
-        <span class="material-icons-round">check_circle</span>
         <span id="toast-msg">Salvo!</span>
     </div>
 
@@ -558,10 +531,13 @@
 
             // Bloqueia zoom por duplo-toque
             let lastTouch = 0;
+            const TAP_OK = 'button, a, input, select, textarea, label, .chip, .record-card';
             document.addEventListener('touchend', (e) => {
                 const now = Date.now();
-                if (now - lastTouch <= 300) e.preventDefault();
+                const quick = now - lastTouch <= 300;
                 lastTouch = now;
+                // Controles já usam touch-action: manipulation (sem zoom), então toques rápidos seguidos funcionam
+                if (quick && !(e.target.closest && e.target.closest(TAP_OK))) e.preventDefault();
             }, { passive: false });
 
             // Bloqueia zoom por pinça em navegadores que disparam multi-touch

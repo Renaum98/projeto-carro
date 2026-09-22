@@ -1,30 +1,32 @@
 /* ============================================================
-   styles/main.css — Estilos principais CarE
+   styles/main.css — Variáveis, reset e base
    ============================================================ */
 
 /* ---------- Variáveis ---------- */
 :root {
-    --bg: #0d0f14;
-    --bg2: #13161e;
-    --bg3: #1a1e28;
-    --card: #1e2332;
-    --border: #2a3048;
+    --bg: #0b0b0c;
+    --bg2: #111113;
+    --bg3: #18181b;
+    --card: #131315;
+    --border: #232326;
+    --border-strong: #303036;
     --accent: #e8c547;
-    --accent2: #f0d96b;
-    --accent-dim: rgba(232, 197, 71, .12);
-    --accent-glow: rgba(232, 197, 71, .25);
-    --danger: #ff5b5b;
-    --danger-dim: rgba(255, 91, 91, .12);
-    --warning: #ff9f43;
-    --warning-dim: rgba(255, 159, 67, .12);
-    --ok: #2ed49a;
-    --ok-dim: rgba(46, 212, 154, .12);
-    --text: #f0f2f7;
-    --text2: #8b91a8;
-    --text3: #5a607a;
-    --radius: 14px;
+    --accent2: #f0d467;
+    --accent-dim: rgba(232, 197, 71, .10);
+    --accent-glow: rgba(232, 197, 71, .18);
+    --danger: #f0544f;
+    --danger-dim: rgba(240, 84, 79, .10);
+    --warning: #f5a524;
+    --warning-dim: rgba(245, 165, 36, .10);
+    --ok: #3ecf8e;
+    --ok-dim: rgba(62, 207, 142, .10);
+    --text: #ededef;
+    --text2: #a1a1a8;
+    --text3: #6b6b73;
+    --radius: 12px;
     --radius-sm: 8px;
-    --shadow: 0 8px 32px rgba(0, 0, 0, .45);
+    --shadow: 0 16px 48px rgba(0, 0, 0, .5);
+    --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* ---------- Reset & Base ---------- */
@@ -41,23 +43,30 @@ html {
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--font);
+    font-size: 15px;
+    line-height: 1.5;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-body::before {
-    content: '';
-    position: fixed;
-    top: -200px;
-    left: -200px;
-    width: 700px;
-    height: 700px;
-    background: radial-gradient(circle, rgba(232, 197, 71, .07) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
+button {
+    font-family: inherit;
+}
+
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* ---------- Ícones (usados só onde agregam) ---------- */
+.material-icons-round {
+    font-size: 18px;
+    line-height: 1;
 }
 
 /* ---------- Scrollbar ---------- */
@@ -66,7 +75,7 @@ body::before {
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--bg);
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {

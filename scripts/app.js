@@ -2,7 +2,6 @@
 //  App — Controller principal
 // ============================================================
 
-import { TYPE_ICONS } from "./data.js";
 import {
   fetchVehicles,
   addVehicle,
@@ -324,11 +323,7 @@ function openDetailModal(id) {
 
   const detail = getStatusDetail(r, activeVehicle?.currentKm ?? null);
   const status = detail.status;
-  const icon = TYPE_ICONS[r.type] || "build";
 
-  const iconEl = document.getElementById("detail-icon");
-  iconEl.className = `detail-icon ${status}`;
-  document.getElementById("detail-icon-name").textContent = icon;
   document.getElementById("detail-title").textContent = r.label;
 
   const statusEl = document.getElementById("detail-status-label");
@@ -660,9 +655,7 @@ function initTypeAutocomplete() {
         const hl = term
           ? s.label.replace(new RegExp(`(${term})`, "gi"), "<mark>$1</mark>")
           : s.label;
-        return `<div class="type-suggestion-item" data-label="${s.label}" data-key="${s.key}">
-        <span class="material-icons-round">${s.icon}</span>${hl}
-      </div>`;
+        return `<div class="type-suggestion-item" data-label="${s.label}" data-key="${s.key}">${hl}</div>`;
       })
       .join("");
 
@@ -733,6 +726,13 @@ function bindEvents() {
   document
     .getElementById("current-km-input")
     .addEventListener("input", handleKmInput);
+
+  // Celular: "Enter"/"Ir" no teclado fecha o teclado
+  ["current-km-input", "search-input"].forEach((id) =>
+    document.getElementById(id).addEventListener("keydown", (e) => {
+      if (e.key === "Enter") e.target.blur();
+    }),
+  );
 
   // Select de veículo
   document

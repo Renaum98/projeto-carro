@@ -2,7 +2,7 @@
 //  Funções de renderização da interface
 // ============================================================
 
-import { VALIDITY, TYPE_ICONS } from "./data.js";
+import { VALIDITY } from "./data.js";
 import {
   getStatus,
   getStatusDetail,
@@ -86,7 +86,6 @@ export function renderAlerts(records) {
 
     const isExpired = detail.status === "danger";
     const cls = isExpired ? "danger" : "warning";
-    const icon = isExpired ? "error" : "warning";
 
     const lines = [];
     if (detail.reason === "date" || detail.reason === "both") {
@@ -94,8 +93,8 @@ export function renderAlerts(records) {
       if (days !== null)
         lines.push(
           days < 0
-            ? `📅 Venceu há ${Math.abs(days)} dia${Math.abs(days) !== 1 ? "s" : ""} (${formatDate(r.nextDate)})`
-            : `📅 Vence em ${days} dia${days !== 1 ? "s" : ""} (${formatDate(r.nextDate)})`,
+            ? `Venceu há ${Math.abs(days)} dia${Math.abs(days) !== 1 ? "s" : ""} (${formatDate(r.nextDate)})`
+            : `Vence em ${days} dia${days !== 1 ? "s" : ""} (${formatDate(r.nextDate)})`,
         );
     }
     if (detail.reason === "km" || detail.reason === "both") {
@@ -103,17 +102,16 @@ export function renderAlerts(records) {
       if (rem !== null)
         lines.push(
           rem <= 0
-            ? `🛞 Ultrapassou em ${Math.abs(rem).toLocaleString("pt-BR")} km (previsto: ${Number(r.nextKm).toLocaleString("pt-BR")} km)`
-            : `🛞 Faltam ${rem.toLocaleString("pt-BR")} km (previsto: ${Number(r.nextKm).toLocaleString("pt-BR")} km)`,
+            ? `Ultrapassou em ${Math.abs(rem).toLocaleString("pt-BR")} km (previsto: ${Number(r.nextKm).toLocaleString("pt-BR")} km)`
+            : `Faltam ${rem.toLocaleString("pt-BR")} km (previsto: ${Number(r.nextKm).toLocaleString("pt-BR")} km)`,
         );
     }
 
     const el = document.createElement("div");
     el.className = `alert-card ${cls}`;
     el.innerHTML = `
-      <span class="material-icons-round">${icon}</span>
       <div class="alert-text">
-        <strong>${r.label} — ${isExpired ? "Revisão vencida!" : "Revisão próxima!"}</strong>
+        <strong>${r.label} — ${isExpired ? "Revisão vencida" : "Revisão próxima"}</strong>
         ${lines.join("<br>")}
       </div>`;
     container.appendChild(el);
@@ -152,7 +150,6 @@ export function renderRecords(
   if (filtered.length === 0) {
     list.innerHTML = `
       <div class="empty-state">
-        <span class="material-icons-round">car_repair</span>
         <p>${
           filter === "all"
             ? "Nenhuma revisão registrada ainda.<br>Adicione a primeira pelo formulário!"
@@ -166,23 +163,22 @@ export function renderRecords(
     .map((r) => {
       const detail = getStatusDetail(r, _currentKm);
       const status = detail.status;
-      const icon = TYPE_ICONS[r.type] || "build";
       const isArchived = !!r.archived;
 
       const dateBadge = r.nextDate
-        ? `<span class="material-icons-round" style="font-size:11px">event</span>${formatDate(r.nextDate)}`
+        ? formatDate(r.nextDate)
         : null;
 
       const kmBadge =
         r.nextKm !== null && r.nextKm !== undefined
-          ? `<span class="material-icons-round" style="font-size:11px">speed</span>${Number(r.nextKm).toLocaleString("pt-BR")} km`
+          ? `${Number(r.nextKm).toLocaleString("pt-BR")} km`
           : null;
 
       const metaParts = [
-        `<span><span class="material-icons-round">calendar_today</span>${formatDate(r.date)}</span>`,
-        `<span><span class="material-icons-round">speed</span>${Number(r.km).toLocaleString("pt-BR")} km</span>`,
+        `<span>${formatDate(r.date)}</span>`,
+        `<span>${Number(r.km).toLocaleString("pt-BR")} km</span>`,
         r.price
-          ? `<span><span class="material-icons-round">payments</span>R$ ${Number(r.price).toFixed(2).replace(".", ",")}</span>`
+          ? `<span>R$ ${Number(r.price).toFixed(2).replace(".", ",")}</span>`
           : "",
       ]
         .filter(Boolean)
@@ -217,9 +213,7 @@ export function renderRecords(
 
       return `
     <div class="record-card status-${status} ${isArchived ? "record-archived" : ""}" data-id="${r.id}">
-      <div class="record-icon ${status}">
-        <span class="material-icons-round">${icon}</span>
-      </div>
+      <span class="record-dot ${status}"></span>
       <div class="record-body">
         <div class="record-title">
           ${r.label}
@@ -327,7 +321,9 @@ export function renderOilSticker(records) {
 
   const rv = rec.revisao;
   const fmtKm = (n) =>
-    n !== null && n !== undefined && n !== "" ? Number(n).toLocaleString("pt-BR") : "—";
+    n !== null && n !== undefined && n !== ""
+      ? `${Number(n).toLocaleString("pt-BR")} km`
+      : "—";
 
   const set = (id, val) => {
     const el = document.getElementById(id);

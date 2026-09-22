@@ -5,10 +5,9 @@
 /* ---------- Wrapper ---------- */
 .app-wrapper {
     position: relative;
-    z-index: 1;
-    max-width: 980px;
+    max-width: 760px;
     margin: 0 auto;
-    padding: 24px 20px 80px;
+    padding: 20px 20px 80px;
 }
 
 /* ---------- Header ---------- */
@@ -16,7 +15,7 @@ header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 18px 0 20px;
+    padding: 8px 0 28px;
     gap: 12px;
 }
 
@@ -26,62 +25,38 @@ header {
     gap: 10px;
 }
 
-.brand-icon {
-    width: 38px;
-    height: 38px;
-    background: var(--accent);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 16px var(--accent-glow);
-    flex-shrink: 0;
-}
-
-.brand-icon .material-icons-round {
-    color: #0d0f14;
-    font-size: 20px;
-}
-
 .brand-name {
-    font-size: 1.15rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
 }
 
 .brand-name span {
     color: var(--accent);
-    filter: drop-shadow(0 0 10px);
-    animation: light 2s infinite alternate;
-}
-
-@keyframes light {
-    from {
-        filter: drop-shadow(0 0 0px);
-    }
-
-    to {
-        filter: drop-shadow(0 0 10px);
-    }
 }
 
 .brand-sub {
-    font-size: .65rem;
-    color: var(--text2);
+    font-size: .75rem;
+    color: var(--text3);
     font-weight: 400;
-    margin-top: -2px;
 }
 
 .header-right {
     display: flex;
     align-items: center;
-    flex-direction: column;
-    gap: 8px;
+    gap: 12px;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .user-name-compact {
     font-size: .82rem;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--text2);
     white-space: nowrap;
     max-width: 120px;
@@ -90,136 +65,150 @@ header {
 }
 
 .btn-compact {
-    padding: 7px 12px !important;
+    padding: 7px 9px !important;
+}
+
+.btn-compact .material-icons-round {
+    font-size: 16px;
 }
 
 .btn-compact .btn-label {
     display: none;
 }
 
-@media (min-width: 500px) {
+@media (min-width: 560px) {
     .btn-compact .btn-label {
         display: inline;
     }
 
+    .btn-compact .material-icons-round {
+        display: none;
+    }
+
     .btn-compact {
-        padding: 8px 14px !important;
+        padding: 7px 12px !important;
     }
 }
 
 /* ---------- Top bar (veículo + odômetro) ---------- */
 .top-bar {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-}
-
-.top-bar .vehicle-selector {
-    flex: 1;
-    min-width: 180px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    margin-bottom: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
 }
 
 .top-bar .odometer-widget {
-    flex: 0 0 auto;
+    border-left: 1px solid var(--border);
+}
+
+@media (max-width: 520px) {
+    .top-bar {
+        grid-template-columns: 1fr;
+    }
+
+    .top-bar .odometer-widget {
+        border-left: none;
+        border-top: 1px solid var(--border);
+    }
 }
 
 /* ---------- Stats ---------- */
 .stats-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-bottom: 14px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+    overflow: hidden;
 }
 
 .stat-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 12px 14px;
+    padding: 14px 16px;
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     align-items: flex-start;
-    gap: 4px;
-    transition: transform .2s;
+    gap: 2px;
 }
 
-.stat-card:hover {
-    transform: translateY(-2px);
-}
-
-.stat-card-icon {
-    font-size: 18px !important;
-    margin-bottom: 2px;
+.stat-card + .stat-card {
+    border-left: 1px solid var(--border);
 }
 
 .stat-label {
-    font-size: .65rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .72rem;
     color: var(--text3);
     font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: .4px;
     line-height: 1.2;
+    white-space: nowrap;
 }
 
 .stat-value {
     font-size: 1.5rem;
-    font-weight: 800;
-    line-height: 1;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
 }
 
-.stat-value.ok {
-    color: var(--ok);
+.dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
 }
 
-.stat-value.warning {
-    color: var(--warning);
+.dot.ok {
+    background: var(--ok);
 }
 
-.stat-value.danger {
-    color: var(--danger);
+.dot.warning {
+    background: var(--warning);
 }
 
-/* ---------- Records toolbar ---------- */
-.records-toolbar {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 12px;
+.dot.danger {
+    background: var(--danger);
 }
 
 /* ---------- Section titles ---------- */
 .section-title {
-    font-size: .8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: var(--text2);
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
+    font-size: .95rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
 }
 
 /* ---------- Records col ---------- */
 .records-col {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 400px) {
+@media (max-width: 440px) {
+    .app-wrapper {
+        padding: 16px 16px 64px;
+    }
+
     .stats-row {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stat-card:nth-child(3) {
+        border-left: none;
+    }
+
+    .stat-card:nth-child(n + 3) {
+        border-top: 1px solid var(--border);
     }
 }
