@@ -3,12 +3,12 @@
 ## Estrutura de arquivos
 
 ```
-autocare/
-├── index.html                  ← HTML principal
+projeto-carro/
+├── index.html                  ← HTML principal (+ meta tags mobile e bloqueios de zoom)
 ├── styles/
-│   ├── main.css                ← Variáveis, reset e base
-│   ├── layout.css              ← Header, grid, stats, responsivo
-│   └── components.css          ← Cards, form, botões, modal, toast
+│   ├── main.css                ← Variáveis de cor/tipografia, reset e base
+│   ├── layout.css              ← Header, barra veículo/KM, resumo, responsivo
+│   └── components.css          ← Cards, etiqueta de óleo, form, modais, toast, mobile/toque
 └── scripts/
     ├── firebase-config.js      ← ⚠️ Suas credenciais Firebase (edite aqui)
     ├── data.js                 ← Tipos de serviço, validades e ícones
@@ -104,10 +104,40 @@ npx serve .
 ## 📦 Funcionalidades
 
 - ✅ Login com Google (dados isolados por usuário)
+- ✅ Vários veículos por conta, com KM atual (odômetro) salvo por veículo
 - ✅ 16 tipos de manutenção com validades médias automáticas
 - ✅ Auto-preenchimento da próxima data/KM
+- ✅ Revisão geral com etiqueta de troca de óleo (motor, câmbio, fluido de freio, filtros, correia e tipo de óleo)
+- ✅ Status por data **e** por KM: em dia 🟢 / atenção 🟡 / vencido 🔴, com barra de progresso
+- ✅ Alertas no topo e notificação do navegador para revisões vencidas
+- ✅ Filtros por status e pesquisa por nome, observação ou data
+- ✅ Detalhes da revisão com editar, apagar, baixar comprovante e reativar
+- ✅ Arquivamento automático da revisão anterior do mesmo tipo
 - ✅ Upload de foto do comprovante (base64 comprimido no Firestore)
-- ✅ Alertas visuais: vencido 🔴 / a vencer 🟡 / em dia 🟢
-- ✅ Filtros por status
 - ✅ Exportar backup em JSON
-- ✅ Dados salvos no Firestore em tempo real
+
+---
+
+## 🎨 Visual
+
+Interface escura e minimalista:
+
+- Fonte **Inter**, paleta neutra e o amarelo da marca (`--accent`) só no botão principal e em destaques pontuais
+- Status indicados por pontos coloridos em vez de ícones
+- Ícones ([Material Icons Round](https://fonts.google.com/icons)) só onde ajudam: busca, fechar, remover veículo, nova revisão, foto anexada e exportar/sair no celular
+- Todas as cores ficam em variáveis no `:root` de `styles/main.css`
+
+---
+
+## 📱 Uso no celular
+
+O app foi pensado primeiro para o celular:
+
+- Botão **Nova revisão** fixo no rodapé, ao alcance do polegar
+- Formulários e detalhes abrem como painel vindo de baixo (*bottom sheet*), com os botões de ação sempre visíveis
+- Áreas de toque de no mínimo ~40px e resposta visual ao tocar
+- Teclado numérico nos campos de KM, data e valor; Enter fecha o teclado no KM atual e na busca
+- Respeita o notch e a barra inferior do iPhone (*safe areas*)
+- Fundo não rola com uma janela aberta
+- Zoom, seleção de texto e modo paisagem bloqueados para parecer um app nativo
+- Pode ser adicionado à tela inicial (nome "CarE" e barra de status escura)
